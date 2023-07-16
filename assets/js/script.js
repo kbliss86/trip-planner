@@ -110,3 +110,34 @@ fetch(placeApi)
     })
 });
 
+// Gas Prices API with API headers
+// APICollect seems limited to at around 10 requests a day from what I've been testing so far
+// Might have to look into alternative options
+var gasPricesApi = "https://api.collectapi.com/gasPrice/allUsaPrice?"
+fetch(gasPricesApi, {
+    headers: {
+        "content-type" : "application/json",
+        "authorization" : "apikey 6LnFl7ojBM5Db77UUp29BB:2uy16XtHFDoco0x3R2zYZ8"
+    }
+})
+    .then(function(response){
+        console.log(response);
+        return response.json();
+    })
+    .then(function(data){
+        var totalGasPrice = 0.00;
+        // Iterates through the array of different gas prices per state
+        // Adds them all together in totalGasPrice
+        for(var i = 0; i < data.result.length; i++){
+            var stateGasPrice = data.result[i].midGrade;
+            // Problem adding the stateGasPrice to totalGasPrice, it adds up weird
+            // If we fix that, everything else should fall in place correctly
+            totalGasPrice = totalGasPrice + stateGasPrice;
+            console.log(data.result[i].midGrade);
+            console.log(totalGasPrice);
+        }
+        // Calculates average gas price
+        var averageGasPrice = totalGasPrice/data.length;
+        console.log(averageGasPrice);
+        console.log(data.result);
+    })
