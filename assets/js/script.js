@@ -1,29 +1,43 @@
 var addWayPointEl = $("#add-waypoint");
 var submitButtonEl = $("#submit-button");
+var clearButtonEl = $("#clear-button");
+
 var waypointCounter = 0;
+var waypointDivEl = $("#waypoint-div")
+var wayPoints = [];
 
 addWayPointEl.on("click", function() {
     var cityEl = "input";
     var stateEl = "input";
-    var searchCardEl = $("#search-card")
+    
 
-    if(waypointCounter < 3){
+    if(waypointCounter < 4){
         var inputElC = document.createElement(cityEl);
         var inputElS = document.createElement(stateEl);
+        var waypointHeader = document.createElement('label');
+        waypointCounter++;
+
+        waypointHeader.setAttribute("class", "form-label w-100 mt-2");
+        waypointHeader.textContent = "Waypoint " + waypointCounter;
+        waypointDivEl.append(waypointHeader);
 
         inputElC.setAttribute("class", "form-control w-100 m-2 p-3 s-3");
         inputElC.setAttribute("type", "text");
         inputElC.setAttribute("placeholder", "Enter City");
-        searchCardEl.append(inputElC);
+        waypointDivEl.append(inputElC);
 
         inputElS.setAttribute("class", "form-control w-100 m-2 p-3 s-3");
         inputElS.setAttribute("type", "text");
         inputElS.setAttribute("placeholder", "Enter State");
-        searchCardEl.append(inputElS);
-
-        waypointCounter++;  
+        waypointDivEl.append(inputElS);
     }
     
+})
+
+clearButtonEl.on("click", function(){
+    waypointDivEl.empty();
+    wayPoints = [];
+    waypointCounter = 0
 })
 
 
