@@ -1,29 +1,43 @@
 var addWayPointEl = $("#add-waypoint");
 var submitButtonEl = $("#submit-button");
+var clearButtonEl = $("#clear-button");
+
 var waypointCounter = 0;
+var waypointDivEl = $("#waypoint-div")
 
 addWayPointEl.on("click", function() {
     var cityEl = "input";
     var stateEl = "input";
-    var searchCardEl = $("#search-card")
+    
 
-    if(waypointCounter < 3){
+    if(waypointCounter < 4){
         var inputElC = document.createElement(cityEl);
         var inputElS = document.createElement(stateEl);
+        var waypointHeader = document.createElement('label');
+        waypointCounter++;
+
+        waypointHeader.setAttribute("class", "form-label w-100 mt-2");
+        waypointHeader.textContent = "Waypoint " + waypointCounter;
+        waypointDivEl.append(waypointHeader);
 
         inputElC.setAttribute("class", "form-control w-100 m-2 p-3 s-3");
         inputElC.setAttribute("type", "text");
         inputElC.setAttribute("placeholder", "Enter City");
-        searchCardEl.append(inputElC);
+        waypointDivEl.append(inputElC);
 
         inputElS.setAttribute("class", "form-control w-100 m-2 p-3 s-3");
         inputElS.setAttribute("type", "text");
         inputElS.setAttribute("placeholder", "Enter State");
-        searchCardEl.append(inputElS);
-
-        waypointCounter++;  
+        waypointDivEl.append(inputElS);
     }
     
+})
+
+clearButtonEl.on("click", function(){
+    waypointDivEl.empty();
+    wayPoints = [];
+    waypointCounter = 0;
+
 })
 
 
@@ -36,22 +50,42 @@ $(function () {
     });
   });
 
-var points = [] // will need to append the lat and long arrays - this may needs to exist outside of the geocode function - one points for routes and the other palces
-var points2 = [] // will need to append the lat and long arrays - this may needs to exist outside of the geocode function - one points for routes and the other palces
+var points = []; // Route API [[lat,long],[lat,long]]
+var points2 = []; // Places API
+var startCoords = ""; //displayMap
+var destCoords = ""; //displayMap
+var waypointCoords = ""; //displayMap
 
 submitButtonEl.on("click", function() {
 // geocode API 
 // will need to create an array of point i think - so we can run through all the points in a loop and add them to a string
 // will need to create a for loop that run runs through each locations and then creates a LAT & LONG Array inside an array - with start point being array 0 and end point being the last value in the array
 var startPoint = ""; // equals the input of the "Starting point" html element - **IDEA** turn this into an array and then we can pass it into the functions as well
-var endPoitnt = ""; // equals the input of the "Destination Point" html element - **IDEA** turn this into an array and then we can pass it into the functions as well
+var endPoint = ""; // equals the input of the "Destination Point" html element - **IDEA** turn this into an array and then we can pass it into the functions as well
 var waypoints = []; // for loop that will loop through all the waypoints and gathers them into an array - **IDEA** turn this into an array and then we can pass it into the functions as well
 var q = "canby,mn"; //
 var geoKey = "ae5c8056-a632-44f7-86b9-adfb12b8775b";
 //we might need to make 3 seperate APIs - one for start, one for end and one for the waypoint array so we can collect the LAT/long variable 
-var geocodeApi = "https://graphhopper.com/api/1/geocode?q="+q+"&key="+geoKey+"&limit=1";
-//functionName(geocodeApi) - this will pass the URL into the fetch function
-//make this into a function itself 
+
+
+var geocodeApiS = "https://graphhopper.com/api/1/geocode?q="+startPoint+"&key="+geoKey+"&limit=1";
+
+
+var geocodeApiE = "https://graphhopper.com/api/1/geocode?q="+endPoint+"&key="+geoKey+"&limit=1";
+
+//for loop
+var geocodeApiW = "https://graphhopper.com/api/1/geocode?q="+waypoints+"&key="+geoKey+"&limit=1";
+
+var pointW = "parse.lat" + "," + "parse.long";
+var waypointsW = []
+waypointsW.push(pointW)
+waypointCoords = array.toString(waypointsW).replace(",","|")
+
+//functionName(geocodeApiS) - this will pass the URL into the fetch function
+//functionName(geocodeApiE) - this will pass the URL into the fetch function
+//functionName(geocodeApiW) - this will pass the URL into the fetch function
+
+
 //function
 //for each  then run fetch and push to array
 fetch(geocodeApi)
@@ -61,9 +95,19 @@ fetch(geocodeApi)
   .then(function (data) {
     console.log(data);
   })
+  var latLong = "parse.lat" + "," + "parse.long";
+  var pointR = [];
+  pointR.push(latLong);
+  points.push(pointR);
+  var pointP = "parse.lat" + "," + "parse.long";
+  points2.push(pointP);
+
+
+  
+
 //push the lat longs into the points array for the routes and places APIs - may need to make 2 arrays - graphhopper route api is LONG/LAT
   points.push("Lat,Long")
-  points2.push("Long,Lat")
+  points2.push("lat,long")
 //route API function
 //function
 var query = new URLSearchParams({
@@ -79,7 +123,7 @@ const resp =  fetch(
         },
         body: JSON.stringify({
             points: [
-                [-96.2633777,44.7277413],
+                [-96.2633777,44.7277413], 
                 [-95.8528615,43.1802172]
             ],
         })
@@ -96,11 +140,11 @@ const resp =  fetch(
 //places API function
 //function
 // for loop for each item in the array
-var plaKey = "AIzaSyD4Xi4w8rZxYlWSoH9Ncby2mpwf0rX9q0g";
-var location = "43.58273465,-96.74120311335915"; //will need to make this = to array index in a for loop
-var radius = 10000;
+var plaKey = "6ZmvylZaxk7KwhT7yxiK5EB3NQJ42tSb";
+var location = "-96.74120311335915,43.58273465"; //will need to make this = to array index in a for loop
 //had to use some weird cross origin access workaround - we need to ask the TAs about this!
-var placeApi = "https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="+location+"&radius="+radius+"&key="+plaKey;
+var placeApi = "https://www.mapquestapi.com/search/v4/place?location="+location+",&q=hotels&sort=relevance&feedback=false&key="+plaKey;
+// var placeApi = "https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="+location+"&radius="+radius+"&key="+plaKey;
 fetch(placeApi)
     .then(function (response){
         return response.json();
@@ -113,31 +157,16 @@ fetch(placeApi)
 // Gas Prices API with API headers
 // APICollect seems limited to at around 10 requests a day from what I've been testing so far
 // Might have to look into alternative options
-var gasPricesApi = "https://api.collectapi.com/gasPrice/allUsaPrice?"
-fetch(gasPricesApi, {
-    headers: {
-        "content-type" : "application/json",
-        "authorization" : "apikey 6LnFl7ojBM5Db77UUp29BB:2uy16XtHFDoco0x3R2zYZ8"
-    }
-})
+var gasPricesApi = "https://api.eia.gov/v2/petroleum/pri/gnd/data/?api_key=4VbUpGHqE0lNDb8xC6yw40vLaJrX4ABEbH2DvqRl&frequency=weekly&data[0]=value&facets[series][]=EMM_EPMRU_PTE_NUS_DPG&start=2023-07-3&sort[0][column]=period&sort[0][direction]=desc&offset=0&length=5000"
+fetch(gasPricesApi)
     .then(function(response){
         console.log(response);
         return response.json();
     })
     .then(function(data){
-        var totalGasPrice = 0.00;
-        // Iterates through the array of different gas prices per state
-        // Adds them all together in totalGasPrice
-        for(var i = 0; i < data.result.length; i++){
-            var stateGasPrice = data.result[i].midGrade;
-            // Problem adding the stateGasPrice to totalGasPrice, it adds up weird
-            // If we fix that, everything else should fall in place correctly
-            totalGasPrice = totalGasPrice + stateGasPrice;
-            console.log(data.result[i].midGrade);
-            console.log(totalGasPrice);
-        }
-        // Calculates average gas price
-        var averageGasPrice = totalGasPrice/data.length;
+        console.log(data)
+        var rdata = data.response;
+        console.log(rdata);
+        var averageGasPrice = rdata.data[0].value;
         console.log(averageGasPrice);
-        console.log(data.result);
     })
