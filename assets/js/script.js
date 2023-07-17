@@ -4,7 +4,6 @@ var clearButtonEl = $("#clear-button");
 
 var waypointCounter = 0;
 var waypointDivEl = $("#waypoint-div")
-var wayPoints = [];
 
 addWayPointEl.on("click", function() {
     var cityEl = "input";
@@ -37,7 +36,8 @@ addWayPointEl.on("click", function() {
 clearButtonEl.on("click", function(){
     waypointDivEl.empty();
     wayPoints = [];
-    waypointCounter = 0
+    waypointCounter = 0;
+
 })
 
 
