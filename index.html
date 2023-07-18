@@ -11,6 +11,7 @@
   <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"> -->
   <link rel="stylesheet" href="./assets/css/style.css">
 </head>
+
 <body>
   <header>
     <h1>Trip planner</h1>
@@ -28,12 +29,12 @@
     <section class="row border p-3 m-5">
       <section id="search-card" class="col-5 text-center border p-3 m-5" >
       <label class="form-label" id="User-StartPoint">Start Point</label>
-      <input type="text" class="form-input w-100 p-3 m-2 s-3" placeholder="Enter City">
-      <input id="state-input" class="form-control w-100 p-3 m-2 s-3" type="text" placeholder="Enter State" >
+      <input id="start-city-input" class="city-input form-input w-100 p-3 m-2 s-3" type="text" placeholder="Enter City">
+      <input id="start-state-input" class="state-input form-control w-100 p-3 m-2 s-3" type="text" placeholder="Enter State" >
 
       <label class="form-label" id="User-EndPoint">End Point</label>
-      <input type="text" class="form-input w-100 p-3 m-2 s-3" placeholder="Enter City">
-      <input id="state-input" class="form-control w-100 p-3 m-2 s-3" type="text" placeholder="Enter State">
+      <input id="end-city-input" class="city-input form-input w-100 p-3 m-2 s-3" type="text" placeholder="Enter City">
+      <input id="end-state-input" class="state-input form-control w-100 p-3 m-2 s-3" type="text" placeholder="Enter State">
 
       <button id="add-waypoint">Add Waypoint</button>
       <div id="waypoint-div"></div>
