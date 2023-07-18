@@ -2,3 +2,8 @@
     margin: 0;
     padding: 0;
 }
+
+section input {
+    margin: 20px;
+    padding: 5px;
+}
