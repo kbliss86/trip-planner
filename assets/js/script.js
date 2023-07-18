@@ -4,35 +4,45 @@ var clearButtonEl = $("#clear-button");
 
 var waypointCounter = 0;
 var waypointDivEl = $("#waypoint-div")
+var waypoints = [];
+
+
 
 addWayPointEl.on("click", function() {
     var cityEl = "input";
     var stateEl = "input";
-    
 
     if(waypointCounter < 4){
         var inputElC = document.createElement(cityEl);
         var inputElS = document.createElement(stateEl);
         var waypointHeader = document.createElement('label');
-        waypointCounter++;
+        
 
+        waypointHeader.setAttribute("id", "waypoint" + waypointCounter);
         waypointHeader.setAttribute("class", "form-label w-100 mt-2");
-        waypointHeader.textContent = "Waypoint " + waypointCounter;
+        
+        waypointHeader.textContent = "Waypoint " + (waypointCounter + 1);
         waypointDivEl.append(waypointHeader);
 
-        inputElC.setAttribute("class", "form-control w-100 m-2 p-3 s-3");
+        inputElC.setAttribute("id", "cityWay" + waypointCounter);
+        inputElC.setAttribute("class", "city-input form-control w-100 m-2 p-3 s-3");
         inputElC.setAttribute("type", "text");
         inputElC.setAttribute("placeholder", "Enter City");
         waypointDivEl.append(inputElC);
 
-        inputElS.setAttribute("class", "form-control w-100 m-2 p-3 s-3");
+        inputElS.setAttribute("id", "stateWay" + waypointCounter);
+        inputElS.setAttribute("class", "state-input form-control w-100 m-2 p-3 s-3");
         inputElS.setAttribute("type", "text");
         inputElS.setAttribute("placeholder", "Enter State");
         waypointDivEl.append(inputElS);
+
+        waypointCounter++;
     }
     
 })
-
+// Fucntion for clearing Data
+// When user data is saved locally and in arrays in Javascript,this function will also clear those as well
+// Add modal for user to confirm they actually want to clear their data
 clearButtonEl.on("click", function(){
     waypointDivEl.empty();
     wayPoints = [];
@@ -48,7 +58,7 @@ $(function () {
     $(".form-control").autocomplete({
       source: stateNames,
     });
-  });
+});
 
 var points = []; // Route API [[lat,long],[lat,long]]
 var points2 = []; // Places API
@@ -113,6 +123,50 @@ fetch(geocodeApi)
 var query = new URLSearchParams({
     key: 'ae5c8056-a632-44f7-86b9-adfb12b8775b'
 }).toString();
+    var userStartCityEl = $('#start-city-input').val()
+    var userStartStateEl = $('#start-state-input').val()
+    var userEndCityEl = $('#end-city-input').val()
+    var userEndStateEl = $('#end-state-input').val()
+
+    if(waypointCounter > 0){
+        for(var i = 0; i < waypointCounter; i++){
+            var waypointCity = $('#cityWay' + (i)).val();
+            console.log(waypointCity);
+            var waypointState = $('#stateWay' + (i)).val();
+            console.log(waypointState);
+        }
+    }
+    // geocode API 
+    // will need to create an array of point i think - so we can run through all the points in a loop and add them to a string
+    // will need to create a for loop that run runs through each locations and then creates a LAT & LONG Array inside an array - with start point being array 0 and end point being the last value in the array
+    var startPoint = userStartCityEl + "," + userStartStateEl; // equals the input of the "Starting point" html element - **IDEA** turn this into an array and then we can pass it into the functions as well
+    var endPoint = userEndCityEl + "," + userEndStateEl;
+    console.log(startPoint);
+    console.log(endPoint); // equals the input of the "Destination Point" html element - **IDEA** turn this into an array and then we can pass it into the functions as well
+    // Made the array variable "waypoints" a global variable
+    var q = "canby,mn"; //
+    var geoKey = "ae5c8056-a632-44f7-86b9-adfb12b8775b";
+    //we might need to make 3 seperate APIs - one for start, one for end and one for the waypoint array so we can collect the LAT/long variable 
+    var geocodeApi = "https://graphhopper.com/api/1/geocode?q="+q+"&key="+geoKey+"&limit=1";
+    //functionName(geocodeApi) - this will pass the URL into the fetch function
+    //make this into a function itself 
+    //function
+    //for each  then run fetch and push to array
+    fetch(geocodeApi)
+    .then(function (response) {
+        return response.json();
+    })
+    .then(function (data) {
+        console.log(data);
+    })
+    //push the lat longs into the points array for the routes and places APIs - may need to make 2 arrays - graphhopper route api is LONG/LAT
+    points.push("Lat,Long")
+    points2.push("Long,Lat")
+    //route API function
+    //function
+    var query = new URLSearchParams({
+        key: 'ae5c8056-a632-44f7-86b9-adfb12b8775b'
+    }).toString();
 
 const resp =  fetch(
     `https://graphhopper.com/api/1/route?${query}`,

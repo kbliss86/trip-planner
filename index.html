@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   <link rel="stylesheet" href="./assets/css/style.css">
 </head>
+
 <body>
   <header>
     <h1>Trip Planner</h1>
@@ -30,13 +31,13 @@
       <section id="search-card" class="col-5 text-center border p-3 m-5" >
         <label class="form-label" id="User-StartPoint">Start Point</label>
         <br><br>
-        <input type="text" class="form-control w-75 p-3 m-2 s-3" placeholder="Enter City">
-        <input type="text" id="state-input" class="form-control w-75 p-3 m-2 s-3" type="text" placeholder="Enter State" >
+        <input id="start-city-input" class="city-input form-control w-75 p-3 m-2 s-3" type="text" placeholder="Enter City">
+        <input type="text" id="start-state-input" class="state-input form-control w-75 p-3 m-2 s-3" type="text" placeholder="Enter State" >
         
         <label class="form-label" id="User-EndPoint">End Point</label>
         <br><br>
-        <input type="text" class="form-control w-75 p-3 m-2 s-3" placeholder="Enter City">
-        <input id="state-input" class="form-control w-75 p-3 m-2 s-3" type="text" placeholder="Enter State">
+        <input id="end-city-input" class="city-input form-control w-75 p-3 m-2 s-3" type="text" placeholder="Enter City">
+        <input id="end-state-input" class="state-input form-control w-75 p-3 m-2 s-3" type="text" placeholder="Enter State">
         
       <!-- Testing Buttons -->
       <!-- <button id="add-waypoint">Add Waypoint</button> -->
@@ -47,12 +48,17 @@
       <button class="btn-large green lighten rounded" id="submit-button">Submit</button>
       <!-- <button type="button">Clear</button> -->
       <button class="btn btn-large red rounded">Clear</button>
+      <!-- <button id="submit-button" type="button">Submit</button> -->
+      <button class="btn-large green lighten rounded" id="submit-button">Submit</button>
+      <!-- <button type="button">Clear</button> -->
+      <button class="btn btn-large red rounded">Clear</button>
       <button id="submit-button" type="button">Submit</button>
       <button id="clear-button" type="button">Clear</button>
       </section>
       <section class="col-6">
         <section class="col border p-3 m-5">
           <!-- <img src="https://placehold.co/600x600" alt="Map"> -->
+          <iframe src="https://www.google.com/maps/embed/v1/directions?key=AIzaSyD4Xi4w8rZxYlWSoH9Ncby2mpwf0rX9q0g&origin=44.7277413,-96.2633777&destination=43.1802172,-95.8528615&waypoints=43.58273465,-96.74120311335915|43.4246842,-95.1019392" width="800" height="800"></iframe>
           <iframe src="https://www.google.com/maps/embed/v1/directions?key=AIzaSyD4Xi4w8rZxYlWSoH9Ncby2mpwf0rX9q0g&origin=44.7277413,-96.2633777&destination=43.1802172,-95.8528615&waypoints=43.58273465,-96.74120311335915|43.4246842,-95.1019392" width="800" height="800"></iframe>
         </section>
         <section class="col border p-3 m-5">
@@ -82,6 +88,7 @@
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
   <!-- jQuery UI <script> tag -->
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 <script src="./assets/js/script.js"> </script>
 </html>
