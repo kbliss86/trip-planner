@@ -89,7 +89,7 @@ var geocodeApiW = "https://graphhopper.com/api/1/geocode?q="+waypoints+"&key="+g
 var pointW = "parse.lat" + "," + "parse.long";
 var waypointsW = []
 waypointsW.push(pointW)
-waypointCoords = array.toString(waypointsW).replace(",","|")
+// waypointCoords = array.toString(waypointsW).replace(",","|")
 
 //functionName(geocodeApiS) - this will pass the URL into the fetch function
 //functionName(geocodeApiE) - this will pass the URL into the fetch function
