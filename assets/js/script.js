@@ -7,60 +7,12 @@ let mapEl = $('#mapEl');
 //counter for waypoint city,state loop
 let waypointCounter = 0;
 let waypointDivEl = $("#waypoint-div");
+let waypointsPlacesEl = $('#waypoint-places')
 
 // Autocompelte function for the state - 1 for the automatically adds the autocomplete on page load
 $(function () {
   let stateNames = [
-    "AL",
-    "AK",
-    "AZ",
-    "AR",
-    "CA",
-    "CO",
-    "CT",
-    "DE",
-    "FL",
-    "GA",
-    "HI",
-    "ID",
-    "IL",
-    "IN",
-    "IA",
-    "KS",
-    "KY",
-    "LA",
-    "ME",
-    "MD",
-    "MA",
-    "MI",
-    "MN",
-    "MS",
-    "MO",
-    "MT",
-    "NE",
-    "NV",
-    "NH",
-    "NJ",
-    "NM",
-    "NY",
-    "NC",
-    "ND",
-    "OH",
-    "OK",
-    "OR",
-    "PA",
-    "RI",
-    "SC",
-    "SD",
-    "TN",
-    "TX",
-    "UT",
-    "VT",
-    "VA",
-    "WA",
-    "WV",
-    "WI",
-    "WY",
+    'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN',"TX",'UT','VT','VA','WA','WV','WI','WY'
   ];
   $(".state-input").autocomplete({
     source: stateNames,
@@ -70,56 +22,7 @@ $(function () {
 //Add Waypoint button
 // state autocomplete values to apply to added waypoin
 let stateNames = [
-  "AL",
-  "AK",
-  "AZ",
-  "AR",
-  "CA",
-  "CO",
-  "CT",
-  "DE",
-  "FL",
-  "GA",
-  "HI",
-  "ID",
-  "IL",
-  "IN",
-  "IA",
-  "KS",
-  "KY",
-  "LA",
-  "ME",
-  "MD",
-  "MA",
-  "MI",
-  "MN",
-  "MS",
-  "MO",
-  "MT",
-  "NE",
-  "NV",
-  "NH",
-  "NJ",
-  "NM",
-  "NY",
-  "NC",
-  "ND",
-  "OH",
-  "OK",
-  "OR",
-  "PA",
-  "RI",
-  "SC",
-  "SD",
-  "TN",
-  "TX",
-  "UT",
-  "VT",
-  "VA",
-  "WA",
-  "WV",
-  "WI",
-  "WY",
+  'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN',"TX",'UT','VT','VA','WA','WV','WI','WY'
 ];
 addWayPointEl.on("click", function () {
   let cityEl = "input";
@@ -162,12 +65,12 @@ let points2 = []; // Places API
 let startCoords = ""; //displayMap
 let destCoords = ""; //displayMap
 let waypointCoords = ""; //displayMap
-let waypoints = []; //waypoint sting (city,state)
+let waypoints = []; //waypoint sting (city,state) - for coordinate API
+let waypoints2 = ["Blank"]; //waypoints2 string (city,State) - For Places API
 let averageGasPrice = "";
 let gasCost = "";
 let distance = "";
 
-//we might need to make 3 seperate APIs - one for start, one for end and one for the waypoint array so we can collect the LAT/long letiable
 //function to gather the start coordinates and start building the arrays for Route/Places/Display Map
 function runStartCoord(startPoint, geoKey) {
   let geocodeApiS =
@@ -188,16 +91,14 @@ function runStartCoord(startPoint, geoKey) {
       let pointR = [];
       pointR.push(long);
       pointR.push(lat);
-      console.log(pointR);
       points.push(pointR);
-      console.log(points);
+
       let pointP = data.hits[0].point.lng + "," + data.hits[0].point.lat; // for Places API - long,lat
-      console.log(pointP);
       points2.push(pointP); // not needed for places API - we dont need places for start point
-      console.log(points2);
+
       let pointM = data.hits[0].point.lat + "," + data.hits[0].point.lng; // for displayMAP API - lat,Long
       startCoords = pointM;
-      console.log(startCoords);
+
       runWayPointCoords(waypoints, geoKey);
     });
 }
@@ -220,29 +121,20 @@ function runWayPointCoords(wayPoints, geokey) {
             return response.json();
           })
           .then(function (data) {
-            console.log(i);
-            console.log(wayPointsW);
             let long = parseFloat(data.hits[0].point.lng); // for Routes API - Long,Lat
             let lat = parseFloat(data.hits[0].point.lat);
             let pointR = [];
             pointR.push(long);
             pointR.push(lat);
-            console.log(pointR);
             points.push(pointR);
-            console.log(points);
+
             let pointP = data.hits[0].point.lng + "," + data.hits[0].point.lat; // for Places API - long,lat
-            console.log(pointP);
             points2.push(pointP);
-            console.log(points2);
+
             let pointM = data.hits[0].point.lat + "," + data.hits[0].point.lng; // for displayMAP API - lat,Long
             wayPointsW.push(pointM);
-            console.log("waypointsW", wayPointsW);
 
-            // waypointCoords = wayPointsW.toString().replaceAll(",", "|");
-            // waypointCoords = wayPointsW.toString().replace(/,/g, function(match, index) {
-            //   return index % 2 === 0 ? "|" : ",";
             waypointCoords = wayPointsW.toString().replace(/,(?=(?:[^,]*,){1}[^,]*$)/g, '|');
-            console.log("waypointCoords", waypointCoords);
             resolve();
           });
       })
@@ -268,23 +160,21 @@ function runEndCoord(endPoint, geoKey) {
     })
     .then(function (data) {
       console.log(data);  
-  // we still need to parse this response and get the Lat/long
   let long = parseFloat(data.hits[0].point.lng); // for Routes API - Long,Lat
   let lat = parseFloat(data.hits[0].point.lat);
   let pointR = [];
   pointR.push(long);
-  pointR.push(lat);
-  console.log(pointR);
+  pointR.push(lat);;
   points.push(pointR);
-  console.log(points);
+
   let pointP = data.hits[0].point.lng + "," + data.hits[0].point.lat; // for Places API - long,lat
-  console.log(pointP);
   points2.push(pointP);
-  console.log(points2);
+
   let pointM = data.hits[0].point.lat + "," + data.hits[0].point.lng; // for displayMAP API - lat,Long
   destCoords = pointM; 
-  console.log(destCoords);
+
   runRouteAPI();
+  runPlacesApi();
 });
 }
 
@@ -315,14 +205,10 @@ function runRouteAPI() {
 .then(function(data) {
     console.log("route", data);
     distance = data.paths[0].distance * 0.000621371;
-    console.log("distanceMiles", distance);
     let gallonsUsed = distance / userMpgEl;
-    console.log("gallonsTest", gallonsUsed)
     gasCost = gallonsUsed * averageGasPrice;
-    console.log("gasCost", gasCost)
     let newURL = "https://www.google.com/maps/embed/v1/directions?key=AIzaSyD4Xi4w8rZxYlWSoH9Ncby2mpwf0rX9q0g&origin=" + startCoords + "&destination=" + destCoords + "&waypoints=" + waypointCoords;
     mapEl.attr("src",newURL);
-    console.log(newURL);
     appendWaypointList();
 })
 }
@@ -338,27 +224,113 @@ function appendWaypointList(){
   returnedGasCost.text(gasCost);
   returnedTotalMiles.text(distance);
 }
-
-//distance is returned in meters - multiply the distance by 0.000621371 to get miles
 //------ CODE NOTES FOR THE ROUTES FETCH FUNCTION ---- END
 
 //------ CODE NOTES FOR THE PLACES FETCH FUNCTION ---- BEGIN
 // this function will hold the fetch for the places API but also the code for inserting the HTML elements with the places data
-//places API function
-//function
-// for loop for each item in the array
-// let plaKey = "6ZmvylZaxk7KwhT7yxiK5EB3NQJ42tSb";
-// let locationX = "-96.74120311335915,43.58273465"; //will need to make this = to array index in a for loop
-// //had to use some weird cross origin access workaround - we need to ask the TAs about this!
-// let placeApi = "https://www.mapquestapi.com/search/v4/place?location="+locationX+",&q=hotels&sort=relevance&feedback=false&key="+plaKey;
-// // let placeApi = "https://cors-anywhere.herokwaypointsuapp.com/https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="+location+"&radius="+radius+"&key="+plaKey;
-// fetch(placeApi)
-//     .then(function (response){
-//         return response.json();
-//     })
-//     .then(function (data) {
-//         console.log(data);
-//     })
+function runPlacesApi() {
+let plaKey = "6ZmvylZaxk7KwhT7yxiK5EB3NQJ42tSb";
+console.log(points2)
+let cardEl = "section";
+let divEl = "div";
+let ulEl = "ul";
+let h2El = "h2"
+let liEl = "li";
+let h3El = "h3";
+let waypointEls = [];
+let waypointHeaderEls = [];
+let placeListHEls = [];
+let placeListBEls = [];
+let placeListREls = [];
+
+for (let i = 1; i < points2.length; i++) {
+  let waypointEl = document.createElement(cardEl);
+  let waypointHeaderEl = document.createElement(h2El);
+  let placeListHEl = document.createElement(divEl);
+  let placeListBEl = document.createElement(divEl);
+  let placeListREl = document.createElement(divEl);
+ 
+//need to set Grid Attributes for materialize to the crated elements
+waypointEl.setAttribute("id", "waypointEl" + i)
+waypointEls[i] = waypointEl;
+waypointsPlacesEl.append(waypointEls[i]);
+
+//make the section a column container so the sections stack
+waypointHeaderEl.textContent = waypoints2[i];
+waypointHeaderEl.setAttribute("id", "waypoint-header" + i );
+waypointHeaderEls[i] = waypointHeaderEl;
+
+// make these dive elements row containers so they appear side by side 
+placeListHEl.setAttribute("id", "place-listH" + i );
+placeListHEls[i] =placeListHEl;
+placeListBEl.setAttribute("id", "place-listB" + i );
+placeListBEls[i] =placeListBEl;
+placeListREl.setAttribute("id", "place-listR" + i );
+placeListREls[i] =placeListREl;
+
+let waypointSectionelementId = "#waypointEl" + i;
+
+$(waypointSectionelementId).append(waypointHeaderEls[i]);
+$(waypointSectionelementId).append(placeListHEls[i]);
+$(waypointSectionelementId).append(placeListBEls[i]);
+$(waypointSectionelementId).append(placeListREls[i]);
+
+//need to replicate what is done for "hotels" in the other fetch APIs to populate the places cards
+
+let placeApiH = "https://www.mapquestapi.com/search/v4/place?location="+points2[i]+",&q=hotels&sort=relevance&feedback=false&key="+plaKey;
+
+let listHElementID = "#place-listH" + i;
+
+let hotelHeader = document.createElement(h3El)
+hotelHeader.textContent = "Hotels in the Area";
+$(listHElementID).append(hotelHeader);
+let hotelUlEl = document.createElement(ulEl)
+hotelUlEl.setAttribute("id", "place-Ul" + i);
+$(listHElementID).append(hotelUlEl)
+let hotelUlElId = "#place-Ul" + i;
+fetch(placeApiH)
+    .then(function (response){
+        return response.json();
+    })
+    .then(function (data) {
+        console.log(data);
+        let resultsH = data.results;
+        console.log("testResults", resultsH)
+        for (let h = 0; h < resultsH.length; h++) {
+          let placelistitemEl = document.createElement(liEl);
+          let hotel = resultsH[h].name;
+          let hotelAddress = resultsH[h].place.properties.street;
+          let hotelCity = resultsH[h].place.properties.city;
+          let hotelState = resultsH[h].place.properties.stateCode;
+          let hotelDisplay = hotel + ", " + hotelAddress + ", " + hotelCity+ ", " + hotelState;
+          placelistitemEl.textContent = hotelDisplay;
+          $(hotelUlElId).append(placelistitemEl);
+        }
+    })
+let placeApiB = "https://www.mapquestapi.com/search/v4/place?location="+points2[i]+",&q=bars&sort=relevance&feedback=false&key="+plaKey;
+
+let listBElementID = "#place-listB" + i;
+
+fetch(placeApiB)
+    .then(function (response){
+        return response.json();
+    })
+    .then(function (data) {
+        console.log(data);
+    })
+let placeApiR = "https://www.mapquestapi.com/search/v4/place?location="+points2[i]+",&q=restaurants&sort=relevance&feedback=false&key="+plaKey;
+
+let listRElementID = "#place-listR" + i;
+
+fetch(placeApiR)
+    .then(function (response){
+        return response.json();
+    })
+    .then(function (data) {
+        console.log(data);
+    })
+  }
+  }
 //------ CODE NOTES FOR THE PLACES FETCH FUNCTION ---- END
 
 // Gas Prices API
@@ -372,9 +344,7 @@ fetch(gasPricesApi)
   .then(function (data) {
     console.log(data);
     let rdata = data.response;
-    console.log(rdata);
     averageGasPrice = rdata.data[0].value;
-    console.log(averageGasPrice);
   });
 //executes data collection for what the user has input on the page
 let userStartCityEl = "";
@@ -402,29 +372,20 @@ submitButtonEl.on("click", async function () {
   if (waypointCounter > 0) {
     for (let i = 0; i < waypointCounter; i++) {
       let waypointCity = $("#cityWay" + i).val();
-      console.log(waypointCity);
       let waypointState = $("#stateWay" + i).val();
-      console.log(waypointState);
       let cityState = waypointCity + "," + waypointState;
       waypoints.push(cityState);
-      console.log(waypoints);
+      waypoints2.push(cityState);
     }
   }
 
   startPoint = userStartCityEl + "," + userStartStateEl; // equals the input of the "Starting point" html element
   endPoint = userEndCityEl + "," + userEndStateEl; // equals the input of the "End point" html element
-  console.log(startPoint);
-  console.log(endPoint); // equals the input of the "Destination Point" html element - **IDEA** turn this into an array and then we can pass it into the functions as well
-
+waypoints2.push(endPoint);
+console.log (waypoints2)
   // we will need a conditional IF statement to determine if waypoints are used - these need to be ran in a certain order to make the Route/Place/Display Map API's Work
 
   runStartCoord(startPoint, geoKey);
-//   runWayPointCoords(waypoints, geoKey);
-//   runEndCoord(endPoint, geoKey);
-
-  //we will need to add a conditional IF statment to build the URL for the display map to determine if waypoints are needed - this should fire off last in the button push function
-
-  // <iframe src="https://www.google.com/maps/embed/v1/directions?key=AIzaSyD4Xi4w8rZxYlWSoH9Ncby2mpwf0rX9q0g&origin=44.7277413,-96.2633777&destination=43.1802172,-95.8528615&waypoints=43.58273465,-96.74120311335915|43.4246842,-95.1019392" width="800" height="800"></iframe>
 });
 
 // Function for clearing Data
