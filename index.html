@@ -38,7 +38,12 @@
         <br><br>
         <input id="end-city-input" class="city-input input-field col" type="text" placeholder="Enter City">
         <input id="end-state-input" class="state-input input-field col" type="text" placeholder="Enter State">
+
+        <label class="form-label" id="User-StartPoint">Vehicle MPG</label>
+        <br><br>
+        <input id="mpg-input" class="mpg-input input-field col" type="text" placeholder="Enter Miles Per Gallon">
         
+
       <!-- Testing Buttons -->
       <!-- <button id="add-waypoint">Add Waypoint</button> -->
       <button class="btn-large blue lighten rounded" id="add-waypoint">Add Waypoint</button>
@@ -53,14 +58,14 @@
       <section class="col-6">
         <section class="col border p-3 m-5">
           <!-- <img src="https://placehold.co/600x600" alt="Map"> -->
-          <iframe src="https://www.google.com/maps/embed/v1/directions?key=AIzaSyD4Xi4w8rZxYlWSoH9Ncby2mpwf0rX9q0g&origin=44.7277413,-96.2633777&destination=43.1802172,-95.8528615&waypoints=43.58273465,-96.74120311335915|43.4246842,-95.1019392" width="800" height="800"></iframe>
+          <iframe id="mapEl" src="https://www.google.com/maps/embed/v1/directions?key=AIzaSyD4Xi4w8rZxYlWSoH9Ncby2mpwf0rX9q0g&origin=44.7277413,-96.2633777&destination=43.1802172,-95.8528615&waypoints=43.58273465,-96.74120311335915|43.4246842,-95.1019392" width="800" height="800"></iframe>
         </section>
-        <section class="col border p-3 m-5">
-          <ul>
-            <li>Each Waypoint</li>
-            <li>Cost of Gas</li>
-            <li>Total Miles</li>
-          </ul>
+        <section class="row border p-3 m-5">
+            <div class="col s3">Each Waypoint
+              <ul id="waypoint-list"></ul>
+            </div>
+            <div class="col s3">Cost of Gas: <span id="gas-cost"></span></div>
+            <div class="col s3">Total Miles: <span id="total-miles"></span></div>
         </section>
       </section>
     </section>
