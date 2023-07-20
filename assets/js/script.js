@@ -2,6 +2,7 @@
 let addWayPointEl = $("#add-waypoint");
 let submitButtonEl = $("#submit-button");
 let clearButtonEl = $("#clear-button");
+let mapEl = $('#mapEl');
 
 //counter for waypoint city,state loop
 let waypointCounter = 0;
@@ -124,7 +125,7 @@ addWayPointEl.on("click", function () {
   let cityEl = "input";
   let stateEl = "input";
   //only allow for 3 waypoints
-  if (waypointCounter < 4) {
+  if (waypointCounter < 3) {
     let inputElC = document.createElement(cityEl);
     let inputElS = document.createElement(stateEl);
     let waypointHeader = document.createElement("label");
@@ -157,11 +158,14 @@ addWayPointEl.on("click", function () {
 });
 // letiable for the API calls
 let points = []; // Route API [[lat,long],[lat,long]]
-let points2 = []; // Places API(Names)
+let points2 = []; // Places API
 let startCoords = ""; //displayMap
 let destCoords = ""; //displayMap
 let waypointCoords = ""; //displayMap
 let waypoints = []; //waypoint sting (city,state)
+let averageGasPrice = "";
+let gasCost = "";
+let distance = "";
 
 //we might need to make 3 seperate APIs - one for start, one for end and one for the waypoint array so we can collect the LAT/long letiable
 //function to gather the start coordinates and start building the arrays for Route/Places/Display Map
@@ -179,17 +183,20 @@ function runStartCoord(startPoint, geoKey) {
     .then(function (data) {
       console.log(data);
       // we still need to parse this response and get the Lat/long
-      let latLong = "parse.lat" + "," + "parse.long";
+      let long = parseFloat(data.hits[0].point.lng); // for Routes API - Long,Lat
+      let lat = parseFloat(data.hits[0].point.lat);
       let pointR = [];
-      pointR.push(latLong);
+      pointR.push(long);
+      pointR.push(lat);
       console.log(pointR);
       points.push(pointR);
       console.log(points);
-      let pointP = "parse.lat" + "," + "parse.long"; // not needed for places API - we dont need places for start poin
+      let pointP = data.hits[0].point.lng + "," + data.hits[0].point.lat; // for Places API - long,lat
       console.log(pointP);
       points2.push(pointP); // not needed for places API - we dont need places for start point
       console.log(points2);
-      startCoords = pointP;
+      let pointM = data.hits[0].point.lat + "," + data.hits[0].point.lng; // for displayMAP API - lat,Long
+      startCoords = pointM;
       console.log(startCoords);
       runWayPointCoords(waypoints, geoKey);
     });
@@ -215,21 +222,26 @@ function runWayPointCoords(wayPoints, geokey) {
           .then(function (data) {
             console.log(i);
             console.log(wayPointsW);
-            let latLong = "parse.latW" + i + "," + "parse.longW" + i;
+            let long = parseFloat(data.hits[0].point.lng); // for Routes API - Long,Lat
+            let lat = parseFloat(data.hits[0].point.lat);
             let pointR = [];
-            pointR.push(latLong);
+            pointR.push(long);
+            pointR.push(lat);
             console.log(pointR);
             points.push(pointR);
             console.log(points);
-            let pointP = "parse.latW" + i + "," + "parse.longW" + i;
+            let pointP = data.hits[0].point.lng + "," + data.hits[0].point.lat; // for Places API - long,lat
             console.log(pointP);
             points2.push(pointP);
             console.log(points2);
-            let pointW = "parse.latW" + i + "," + "parse.longW" + i;
-            wayPointsW.push(pointW);
+            let pointM = data.hits[0].point.lat + "," + data.hits[0].point.lng; // for displayMAP API - lat,Long
+            wayPointsW.push(pointM);
             console.log("waypointsW", wayPointsW);
 
-            waypointCoords = wayPointsW.toString().replaceAll(",", "|");
+            // waypointCoords = wayPointsW.toString().replaceAll(",", "|");
+            // waypointCoords = wayPointsW.toString().replace(/,/g, function(match, index) {
+            //   return index % 2 === 0 ? "|" : ",";
+            waypointCoords = wayPointsW.toString().replace(/,(?=(?:[^,]*,){1}[^,]*$)/g, '|');
             console.log("waypointCoords", waypointCoords);
             resolve();
           });
@@ -255,64 +267,78 @@ function runEndCoord(endPoint, geoKey) {
       return response.json();
     })
     .then(function (data) {
-      console.log(data);
-    });
+      console.log(data);  
   // we still need to parse this response and get the Lat/long
-  let latLong = "parse.latEE" + "," + "parse.longEE";
+  let long = parseFloat(data.hits[0].point.lng); // for Routes API - Long,Lat
+  let lat = parseFloat(data.hits[0].point.lat);
   let pointR = [];
-  pointR.push(latLong);
+  pointR.push(long);
+  pointR.push(lat);
   console.log(pointR);
   points.push(pointR);
   console.log(points);
-  let pointP = "parse.latEE" + "," + "parse.longEE";
+  let pointP = data.hits[0].point.lng + "," + data.hits[0].point.lat; // for Places API - long,lat
   console.log(pointP);
   points2.push(pointP);
   console.log(points2);
-  destCoords = pointP;
+  let pointM = data.hits[0].point.lat + "," + data.hits[0].point.lng; // for displayMAP API - lat,Long
+  destCoords = pointM; 
   console.log(destCoords);
+  runRouteAPI();
+});
 }
-//--------CODE NOTES FOR THE FOR LOOP NEEDED TO RUN AND COLLECT THE GEOCODE COORDS ---BEGIN
-
-//for loop
-// let geocodeApiW = "https://graphhopper.com/api/1/geocode?q="+waypoints+"&key="+geoKey+"&limit=1";
-
-// let pointW = "parse.lat" + "," + "parse.long";
-// let waypointsW = []
-// waypointsW.push(pointW)
-// waypointCoords = array.toString(waypointsW).replace(",","|")
-
-//create 3 function to fire off in an order that allows the arrays to be build to support the route/places API calls
-//functionName(geocodeApiS) - this will pass the URL into the fetch function
-//functionName(geocodeApiE) - this will pass the URL into the fetch function
-//functionName(geocodeApiW) - this will pass the URL into the fetch function
-//--------CODE NOTES FOR THE FOR LOOP NEEDED TO RUN AND COLLECT THE GEOCODE COORDS ---END
 
 //------ CODE NOTES FOR THE ROUTES FETCH FUNCTION ---- BEGIN
-//     let query = new URLSearchParams({
-//         key: 'ae5c8056-a632-44f7-86b9-adfb12b8775b'
-//     }).toString();
+function runRouteAPI() {
+    let query = new URLSearchParams({
+        key: 'ae5c8056-a632-44f7-86b9-adfb12b8775b'
+    }).toString();
 
-//     const resp =  fetch(
-//     `https://graphhopper.com/api/1/route?${query}`,
-//     {
-//         method: 'POST',
-//         headers: {
-//             'Content-Type': 'application/json'
-//         },
-//         body: JSON.stringify({
-//             points: [
-//                 [-96.2633777,44.7277413],
-//                 [-95.8528615,43.1802172]
-//             ],
-//         })
-//     }
-// )
-// .then(function(response) {
-//     return response.json();
-// })
-// .then(function(data) {
-//     console.log(data);
-// })
+    const resp =  fetch(
+    `https://graphhopper.com/api/1/route?${query}`,
+    {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+              points: points,
+              optimize: 'true',
+              details: ['road_class', 'surface'],
+              vehicle: 'car',
+        })
+    }
+)
+.then(function(response) {
+    return response.json();
+})
+.then(function(data) {
+    console.log("route", data);
+    distance = data.paths[0].distance * 0.000621371;
+    console.log("distanceMiles", distance);
+    let gallonsUsed = distance / userMpgEl;
+    console.log("gallonsTest", gallonsUsed)
+    gasCost = gallonsUsed * averageGasPrice;
+    console.log("gasCost", gasCost)
+    let newURL = "https://www.google.com/maps/embed/v1/directions?key=AIzaSyD4Xi4w8rZxYlWSoH9Ncby2mpwf0rX9q0g&origin=" + startCoords + "&destination=" + destCoords + "&waypoints=" + waypointCoords;
+    mapEl.attr("src",newURL);
+    console.log(newURL);
+    appendWaypointList();
+})
+}
+
+function appendWaypointList(){
+  for(var i = 0; i < waypoints.length; i++){
+    let waypointName = $("<li>"+ waypoints[i] + "</li>");
+    returnedWaypoints.append(waypointName);
+  }
+  let endPointName = $("<li>"+ endPoint + "</li>");
+  returnedWaypoints.append(endPointName);
+
+  returnedGasCost.text(gasCost);
+  returnedTotalMiles.text(distance);
+}
+
 //distance is returned in meters - multiply the distance by 0.000621371 to get miles
 //------ CODE NOTES FOR THE ROUTES FETCH FUNCTION ---- END
 
@@ -347,7 +373,7 @@ fetch(gasPricesApi)
     console.log(data);
     let rdata = data.response;
     console.log(rdata);
-    let averageGasPrice = rdata.data[0].value;
+    averageGasPrice = rdata.data[0].value;
     console.log(averageGasPrice);
   });
 //executes data collection for what the user has input on the page
@@ -355,6 +381,11 @@ let userStartCityEl = "";
 let userStartStateEl="";
 let userEndCityEl="";
 let userEndStateEl="";
+let userMpgEl="";
+
+let returnedWaypoints = $("#waypoint-list")
+let returnedGasCost = $("#gas-cost")
+let returnedTotalMiles = $("#total-miles")
 
 let startPoint = userStartCityEl + "," + userStartStateEl; // equals the input of the "Starting point" html element
 let endPoint = userEndCityEl + "," + userEndStateEl; // equals the input of the "End point" html element
@@ -366,6 +397,7 @@ submitButtonEl.on("click", async function () {
   userStartStateEl = $("#start-state-input").val();
   userEndCityEl = $("#end-city-input").val();
   userEndStateEl = $("#end-state-input").val();
+  userMpgEl = $("#mpg-input").val();
 
   if (waypointCounter > 0) {
     for (let i = 0; i < waypointCounter; i++) {
@@ -391,6 +423,7 @@ submitButtonEl.on("click", async function () {
 //   runEndCoord(endPoint, geoKey);
 
   //we will need to add a conditional IF statment to build the URL for the display map to determine if waypoints are needed - this should fire off last in the button push function
+
   // <iframe src="https://www.google.com/maps/embed/v1/directions?key=AIzaSyD4Xi4w8rZxYlWSoH9Ncby2mpwf0rX9q0g&origin=44.7277413,-96.2633777&destination=43.1802172,-95.8528615&waypoints=43.58273465,-96.74120311335915|43.4246842,-95.1019392" width="800" height="800"></iframe>
 });
 
@@ -401,4 +434,4 @@ clearButtonEl.on("click", function () {
   waypointDivEl.empty();
   wayPoints = [];
   waypointCounter = 0;
-});
+})
