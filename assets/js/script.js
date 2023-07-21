@@ -82,15 +82,14 @@ function runStartCoord(startPoint, geoKey) {
   fetch(geocodeApiS)
     .then(function (response) {
       console.log("response", response);
-      if(response.status !== 200){
         console.log('error');
-        // return error modal
-        return;
-      }else{
-        return response.json();
-      }
-      
-    })
+        if(response.status === 200){
+          return response.json();
+        }else{
+          openErrorMsg();
+          return;
+        }
+      })
     .then(function (data) {
       console.log(data);
       // we still need to parse this response and get the Lat/long
@@ -131,14 +130,14 @@ function runWayPointCoords(wayPoints, geokey) {
         fetch(geocodeApiS)
           .then(function (response) {
             
-            if(response.status !== 200){
-              // return error modal
               console.log('error');
-              return;
-            }else{
-              return response.json();
-            }
-          })
+              if(response.status === 200){
+                return response.json();
+              }else{
+                openErrorMsg();
+                return;
+              }
+            })
           .then(function (data) {
             let long = parseFloat(data.hits[0].point.lng); // for Routes API - Long,Lat
             let lat = parseFloat(data.hits[0].point.lat);
@@ -175,14 +174,14 @@ function runEndCoord(endPoint, geoKey) {
     "&limit=1";
   fetch(geocodeApiS)
     .then(function (response) {
-      console.log('error');
-      if(response.status === 200){
-        return response.json();
-      }else{
-        // error modal  function
-        return;
-      }
-    })
+        console.log('error');
+        if(response.status === 200){
+          return response.json();
+        }else{
+          openErrorMsg();
+          return;
+        }
+      })
     .then(function (data) {
       if(!data){
         return;
@@ -226,11 +225,16 @@ function runRouteAPI() {
         })
     }
 )
-.then(function(response) {
-    return response.json();
-})
+.then(function (response){
+  return response.json();
+})   
 .then(function(data) {
     console.log("route", data);
+    let message = data.message;
+    console.log(message);
+    if (message !== null){
+      openErrorMsg();
+    }
     distance = data.paths[0].distance * 0.000621371;
     let gallonsUsed = distance / userMpgEl;
     gasCost = gallonsUsed * averageGasPrice;
@@ -503,3 +507,29 @@ clearButtonEl.on("click", function () {
 
   clearData();
 })
+
+// function showModal() {
+//   // Call this function when you want to show the modal
+//   openModal();
+// }
+
+function openErrorMsg() {
+    const modalElem = document.querySelector('#modal1');
+
+    const closeModalBtn = document.querySelector('.modal-close');
+
+    const modalInstance = M.Modal.init(modalElem);
+
+    // function openModal() {
+      modalInstance.open();
+    // }
+
+    // openModal();
+
+    // Attach the closeModal function to the close button click event
+    closeModalBtn.addEventListener('click', closeModal);
+
+    function closeModal() {
+      modalInstance.close();
+    }
+  };
