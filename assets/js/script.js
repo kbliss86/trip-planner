@@ -81,7 +81,15 @@ function runStartCoord(startPoint, geoKey) {
     "&limit=1";
   fetch(geocodeApiS)
     .then(function (response) {
-      return response.json();
+      console.log("response", response);
+      if(response.status !== 200){
+        console.log('error');
+        // return error modal
+        return;
+      }else{
+        return response.json();
+      }
+      
     })
     .then(function (data) {
       console.log(data);
@@ -99,10 +107,14 @@ function runStartCoord(startPoint, geoKey) {
       let pointM = data.hits[0].point.lat + "," + data.hits[0].point.lng; // for displayMAP API - lat,Long
       startCoords = pointM;
 
-      runWayPointCoords(waypoints, geoKey);
+      if(waypointCounter > 0){
+        runWayPointCoords(waypoints, geoKey);
+      }else{
+        runEndCoord(endPoint, geoKey);
+      }
     });
 }
-
+//Add IF Statement
 //function to gather the end coordinates and continue building the arrays for Route/Places/Display Map
 function runWayPointCoords(wayPoints, geokey) {
   let wayPointsW = [];
@@ -118,7 +130,14 @@ function runWayPointCoords(wayPoints, geokey) {
       new Promise(function (resolve, reject) {
         fetch(geocodeApiS)
           .then(function (response) {
-            return response.json();
+            
+            if(response.status !== 200){
+              // return error modal
+              console.log('error');
+              return;
+            }else{
+              return response.json();
+            }
           })
           .then(function (data) {
             let long = parseFloat(data.hits[0].point.lng); // for Routes API - Long,Lat
@@ -156,15 +175,24 @@ function runEndCoord(endPoint, geoKey) {
     "&limit=1";
   fetch(geocodeApiS)
     .then(function (response) {
-      return response.json();
+      console.log('error');
+      if(response.status === 200){
+        return response.json();
+      }else{
+        // error modal  function
+        return;
+      }
     })
     .then(function (data) {
+      if(!data){
+        return;
+      }
       console.log(data);  
   let long = parseFloat(data.hits[0].point.lng); // for Routes API - Long,Lat
   let lat = parseFloat(data.hits[0].point.lat);
   let pointR = [];
   pointR.push(long);
-  pointR.push(lat);;
+  pointR.push(lat);
   points.push(pointR);
 
   let pointP = data.hits[0].point.lng + "," + data.hits[0].point.lat; // for Places API - long,lat
@@ -174,7 +202,6 @@ function runEndCoord(endPoint, geoKey) {
   destCoords = pointM; 
 
   runRouteAPI();
-  runPlacesApi();
 });
 }
 
@@ -207,22 +234,31 @@ function runRouteAPI() {
     distance = data.paths[0].distance * 0.000621371;
     let gallonsUsed = distance / userMpgEl;
     gasCost = gallonsUsed * averageGasPrice;
-    let newURL = "https://www.google.com/maps/embed/v1/directions?key=AIzaSyD4Xi4w8rZxYlWSoH9Ncby2mpwf0rX9q0g&origin=" + startCoords + "&destination=" + destCoords + "&waypoints=" + waypointCoords;
+    let newURL = '';
+    if(waypointCounter > 0){
+    newURL = "https://www.google.com/maps/embed/v1/directions?key=AIzaSyD4Xi4w8rZxYlWSoH9Ncby2mpwf0rX9q0g&origin=" + startCoords + "&destination=" + destCoords + "&waypoints=" + waypointCoords; // IF statement here
+    }else{
+    newURL = "https://www.google.com/maps/embed/v1/directions?key=AIzaSyD4Xi4w8rZxYlWSoH9Ncby2mpwf0rX9q0g&origin=" + startCoords + "&destination=" + destCoords; // IF statement here
+    }
     mapEl.attr("src",newURL);
     appendWaypointList();
+    runPlacesApi();
 })
 }
-
+// --- NEED IF STATEMENT HERE ---//
 function appendWaypointList(){
-  for(var i = 0; i < waypoints.length; i++){
-    let waypointName = $("<li>"+ waypoints[i] + "</li>");
-    returnedWaypoints.append(waypointName);
+if(waypointCounter > 0){
+    for(var i = 0; i < waypoints.length; i++){
+      let waypointName = $("<li>"+ waypoints[i] + "</li>");
+      returnedWaypoints.append(waypointName);
+    }
   }
-  let endPointName = $("<li>"+ endPoint + "</li>");
-  returnedWaypoints.append(endPointName);
+    let endPointName = $("<li>"+ endPoint + "</li>");
+    returnedWaypoints.append(endPointName);
 
-  returnedGasCost.text(gasCost);
-  returnedTotalMiles.text(distance);
+    returnedGasCost.text(gasCost);
+    returnedTotalMiles.text(distance);
+  
 }
 //------ CODE NOTES FOR THE ROUTES FETCH FUNCTION ---- END
 
@@ -240,15 +276,15 @@ let h3El = "h3";
 let waypointEls = [];
 let waypointHeaderEls = [];
 let placeListHEls = [];
-let placeListBEls = [];
 let placeListREls = [];
+let placeListPEls = [];
 
 for (let i = 1; i < points2.length; i++) {
   let waypointEl = document.createElement(cardEl);
   let waypointHeaderEl = document.createElement(h2El);
   let placeListHEl = document.createElement(divEl);
-  let placeListBEl = document.createElement(divEl);
   let placeListREl = document.createElement(divEl);
+  let placeListPEl = document.createElement(divEl);
  
 //need to set Grid Attributes for materialize to the crated elements
 waypointEl.setAttribute("id", "waypointEl" + i)
@@ -263,17 +299,17 @@ waypointHeaderEls[i] = waypointHeaderEl;
 // make these dive elements row containers so they appear side by side 
 placeListHEl.setAttribute("id", "place-listH" + i );
 placeListHEls[i] =placeListHEl;
-placeListBEl.setAttribute("id", "place-listB" + i );
-placeListBEls[i] =placeListBEl;
 placeListREl.setAttribute("id", "place-listR" + i );
 placeListREls[i] =placeListREl;
+placeListPEl.setAttribute("id", "place-listP" + i );
+placeListPEls[i] =placeListPEl;
 
 let waypointSectionelementId = "#waypointEl" + i;
 
 $(waypointSectionelementId).append(waypointHeaderEls[i]);
 $(waypointSectionelementId).append(placeListHEls[i]);
-$(waypointSectionelementId).append(placeListBEls[i]);
 $(waypointSectionelementId).append(placeListREls[i]);
+$(waypointSectionelementId).append(placeListPEls[i]);
 
 //need to replicate what is done for "hotels" in the other fetch APIs to populate the places cards
 
@@ -285,9 +321,9 @@ let hotelHeader = document.createElement(h3El)
 hotelHeader.textContent = "Hotels in the Area";
 $(listHElementID).append(hotelHeader);
 let hotelUlEl = document.createElement(ulEl)
-hotelUlEl.setAttribute("id", "place-Ul" + i);
+hotelUlEl.setAttribute("id", "hotel-place-Ul" + i);
 $(listHElementID).append(hotelUlEl)
-let hotelUlElId = "#place-Ul" + i;
+let hotelUlElId = "#hotel-place-Ul" + i;
 fetch(placeApiH)
     .then(function (response){
         return response.json();
@@ -307,9 +343,17 @@ fetch(placeApiH)
           $(hotelUlElId).append(placelistitemEl);
         }
     })
-let placeApiB = "https://www.mapquestapi.com/search/v4/place?location="+points2[i]+",&q=bars&sort=relevance&feedback=false&key="+plaKey;
+let placeApiB = "https://www.mapquestapi.com/search/v4/place?location="+points2[i]+",&q=restaurants&sort=relevance&feedback=false&key="+plaKey;
 
-let listBElementID = "#place-listB" + i;
+let listRElementID = "#place-listR" + i;
+
+let restaurantHeader = document.createElement(h3El)
+restaurantHeader.textContent = "Restaurants in the Area";
+$(listRElementID).append(restaurantHeader);
+let restaurantUlEl = document.createElement(ulEl)
+restaurantUlEl.setAttribute("id", "restaurant-place-Ul" + i);
+$(listRElementID).append(restaurantUlEl)
+let restaurantUlElId = "#restaurant-place-Ul" + i;
 
 fetch(placeApiB)
     .then(function (response){
@@ -317,10 +361,30 @@ fetch(placeApiB)
     })
     .then(function (data) {
         console.log(data);
+        let resultsR = data.results;
+        console.log("testResults", resultsR)
+        for (let r = 0; r < resultsR.length; r++) {
+          let placelistitemEl = document.createElement(liEl);
+          let restaurant = resultsR[r].name;
+          let restaurantAddress = resultsR[r].place.properties.street;
+          let restaurantCity = resultsR[r].place.properties.city;
+          let restaurantState = resultsR[r].place.properties.stateCode;
+          let restaurantDisplay = restaurant + ", " + restaurantAddress + ", " + restaurantCity+ ", " + restaurantState;
+          placelistitemEl.textContent = restaurantDisplay;
+          $(restaurantUlElId).append(placelistitemEl);
+        }
     })
-let placeApiR = "https://www.mapquestapi.com/search/v4/place?location="+points2[i]+",&q=restaurants&sort=relevance&feedback=false&key="+plaKey;
+let placeApiR = "https://www.mapquestapi.com/search/v4/place?location="+points2[i]+",&q=parks&sort=relevance&feedback=false&key="+plaKey;
 
-let listRElementID = "#place-listR" + i;
+let listPElementID = "#place-listP" + i;
+
+let parkHeader = document.createElement(h3El)
+parkHeader.textContent = "Parks in the Area";
+$(listPElementID).append(parkHeader);
+let parkUlEl = document.createElement(ulEl)
+parkUlEl.setAttribute("id", "park-place-Ul" + i);
+$(listPElementID).append(parkUlEl)
+let parkUlElId = "#park-place-Ul" + i;
 
 fetch(placeApiR)
     .then(function (response){
@@ -328,8 +392,21 @@ fetch(placeApiR)
     })
     .then(function (data) {
         console.log(data);
+        let resultsP = data.results;
+        console.log("testResults", resultsP)
+        for (let p = 0; p < resultsP.length; p++) {
+          let placelistitemEl = document.createElement(liEl);
+          let park = resultsP[p].name;
+          let parkAddress = resultsP[p].place.properties.street;
+          let parkCity = resultsP[p].place.properties.city;
+          let parkState = resultsP[p].place.properties.stateCode;
+          let parkDisplay = park + ", " + parkAddress + ", " + parkCity+ ", " + parkState;
+          placelistitemEl.textContent = parkDisplay;
+          $(parkUlElId).append(placelistitemEl);
+        }
     })
   }
+  clearData();
   }
 //------ CODE NOTES FOR THE PLACES FETCH FUNCTION ---- END
 
@@ -346,12 +423,35 @@ fetch(gasPricesApi)
     let rdata = data.response;
     averageGasPrice = rdata.data[0].value;
   });
+
+  function clearData(){
+    userStartCityEl = "";
+    userStartStateEl="";
+    userEndCityEl="";
+    userEndStateEl="";
+    userMpgEl="";
+    startPoint = "";
+    endPoint = "";
+    points = [];
+    points2 = [];
+    startCoords = "";
+    destCoords = "";
+    waypointCoords = "";
+    waypoints = [];
+    waypoints2 = ["Blank"];
+    averageGasPrice = "";
+    gasCost = "";
+    distance = "";
+    waypointCounter=0;
+    waypointDivEl.empty();
+  }
 //executes data collection for what the user has input on the page
 let userStartCityEl = "";
 let userStartStateEl="";
 let userEndCityEl="";
 let userEndStateEl="";
 let userMpgEl="";
+
 
 let returnedWaypoints = $("#waypoint-list")
 let returnedGasCost = $("#gas-cost")
@@ -363,11 +463,15 @@ let endPoint = userEndCityEl + "," + userEndStateEl; // equals the input of the 
 let geoKey = "ae5c8056-a632-44f7-86b9-adfb12b8775b";
 
 submitButtonEl.on("click", async function () {
+  returnedWaypoints.empty();
+  waypointsPlacesEl.empty();
   userStartCityEl = $("#start-city-input").val();
   userStartStateEl = $("#start-state-input").val();
-  userEndCityEl = $("#end-city-input").val();
+  userEndCityEl = $("#start-city-input").val();
   userEndStateEl = $("#end-state-input").val();
   userMpgEl = $("#mpg-input").val();
+
+  // if (myArray.length === 0)
 
   if (waypointCounter > 0) {
     for (let i = 0; i < waypointCounter; i++) {
@@ -392,7 +496,10 @@ console.log (waypoints2)
 // When user data is saved locally and in arrays in Javascript,this function will also clear those as well
 // Add modal for user to confirm they actually want to clear their data
 clearButtonEl.on("click", function () {
-  waypointDivEl.empty();
-  wayPoints = [];
-  waypointCounter = 0;
+  $("#start-city-input").val('');
+  $("#start-state-input").val('');
+  $("#end-city-input").val('');
+  $("#end-state-input").val('');
+
+  clearData();
 })
