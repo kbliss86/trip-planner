@@ -487,15 +487,17 @@ let endPoint = userEndCityEl + "," + userEndStateEl; // equals the input of the 
 
 let geoKey = "ae5c8056-a632-44f7-86b9-adfb12b8775b";
 
+
+
 submitButtonEl.on("click", async function () {
   clearData();
 
   savedUserInputs = {
-    startCity:'',
-    startState:'',
-    endCity:'',
-    endState:'',
-    mpg:'',
+    startCity: '',
+    startState: '',
+    endCity: '',
+    endState: '',
+    mpg: '',
   }
 
   returnedWaypoints.empty();
@@ -505,6 +507,19 @@ submitButtonEl.on("click", async function () {
   userEndStateEl = $("#end-state-input").val();
   userMpgEl = $("#mpg-input").val();
   mapEl.attr("https://www.google.com/maps/embed/v1/view?key=AIzaSyD4Xi4w8rZxYlWSoH9Ncby2mpwf0rX9q0g&center=41.925391, -102.455213");
+
+  //  || !checkUserLocation(userStartStateEl) || !checkUserLocation(userEndCityEl) || !checkUserLocation(userEndStateEl)
+  console.log(!checkUserLocation(userStartCityEl));
+  if (!checkUserLocation(userStartCityEl) || !checkUserLocation(userStartStateEl) || !checkUserLocation(userEndCityEl) || !checkUserLocation(userEndStateEl)) {
+    locationErrorMsg();
+    return;
+  }
+
+  if (isNaN(userMpgEl) || userMpgEl.trim() === "") {
+    gasErrorMsg();
+    return;
+  }
+
 
   userStartCityEl = userStartCityEl.toLowerCase().replace(/(^|\s)\S/g, function (letter) {
     return letter.toUpperCase();
@@ -521,13 +536,13 @@ submitButtonEl.on("click", async function () {
     for (let i = 0; i < waypointCounter; i++) {
       let waypointCity = $("#cityWay" + i).val();
       let waypointState = $("#stateWay" + i).val();
-      
+
       waypointCity = waypointCity.toLowerCase().replace(/(^|\s)\S/g, function (letter) {
         return letter.toUpperCase();
       })
 
       waypointState = waypointState.toUpperCase();
-      
+
 
       let cityState = waypointCity + "," + waypointState;
       waypoints.push(cityState);
@@ -562,6 +577,8 @@ clearButtonEl.on("click", function () {
   $("#end-state-input").val('');
   $("#mpg-input").val('');
   waypointDivEl.empty();
+  waypointsPlacesEl.empty();
+
   waypointCounter = 0;
 
   mapEl.attr("src", "https://www.google.com/maps/embed/v1/view?key=AIzaSyD4Xi4w8rZxYlWSoH9Ncby2mpwf0rX9q0g&center=41.925391, -102.455213");
@@ -569,10 +586,10 @@ clearButtonEl.on("click", function () {
   clearData();
 })
 
-function init(){
+function init() {
   savedUserInputs = JSON.parse(localStorage.getItem('savedUserInputs'));
 
-  if(savedUserInputs.startCity !== undefined){
+  if (savedUserInputs.startCity !== undefined) {
     $("#start-city-input").val(savedUserInputs.startCity);
     $("#start-state-input").val(savedUserInputs.startState);
     $("#end-city-input").val(savedUserInputs.endCity);
@@ -580,11 +597,11 @@ function init(){
     $("#mpg-input").val(savedUserInputs.mpg);
 
     userMpgEl = Number(savedUserInputs.mpg);
-    startPoint = savedUserInputs.startCity + "," + savedUserInputs.startState ; // equals the input of the "Starting point" html element
+    startPoint = savedUserInputs.startCity + "," + savedUserInputs.startState; // equals the input of the "Starting point" html element
     endPoint = savedUserInputs.endCity + "," + savedUserInputs.endState; // equals the input of the "End point" html element
 
     runStartCoord(startPoint, geoKey);
-    }
+  }
 
 }
 
@@ -592,9 +609,39 @@ function init(){
 //   // Call this function when you want to show the modal
 //   openModal();
 // }
+function checkUserLocation(userLocation) {
+  console.log('userLocation', isNaN(userLocation));
+  if (!isNaN(userLocation) || userLocation.trim() === "") {
+    return false;
+  } else {
+    return true;
+  }
+}
 
-function openErrorMsg() {
-  const modalElem = document.querySelector('#modal1');
+function locationErrorMsg() {
+  const modalElem = document.querySelector('#invalid-location');
+
+  const closeModalBtn = document.querySelector('.modal-close');
+
+  const modalInstance = M.Modal.init(modalElem);
+
+  // function openModal() {
+  modalInstance.open();
+  // }
+
+  // openModal();
+
+  // Attach the closeModal function to the close button click event
+  closeModalBtn.addEventListener('click', closeModal);
+
+  function closeModal() {
+    modalInstance.close();
+  }
+
+}
+
+function gasErrorMsg() {
+  const modalElem = document.querySelector('#invalid-mpg');
 
   const closeModalBtn = document.querySelector('.modal-close');
 
