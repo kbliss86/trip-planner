@@ -9,10 +9,11 @@ let waypointCounter = 0;
 let waypointDivEl = $("#waypoint-div");
 let waypointsPlacesEl = $('#waypoint-places')
 
+
 // Autocompelte function for the state - 1 for the automatically adds the autocomplete on page load
 $(function () {
   let stateNames = [
-    'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN',"TX",'UT','VT','VA','WA','WV','WI','WY'
+    'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', "TX", 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
   ];
   $(".state-input").autocomplete({
     source: stateNames,
@@ -22,7 +23,7 @@ $(function () {
 //Add Waypoint button
 // state autocomplete values to apply to added waypoin
 let stateNames = [
-  'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN',"TX",'UT','VT','VA','WA','WV','WI','WY'
+  'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', "TX", 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
 ];
 addWayPointEl.on("click", function () {
   let cityEl = "input";
@@ -81,7 +82,14 @@ function runStartCoord(startPoint, geoKey) {
     "&limit=1";
   fetch(geocodeApiS)
     .then(function (response) {
-      return response.json();
+      console.log("response", response);
+      if (response.status === 200) {
+        return response.json();
+      } else {
+        console.log('error');
+        openErrorMsg();
+        return;
+      }
     })
     .then(function (data) {
       console.log(data);
@@ -99,10 +107,14 @@ function runStartCoord(startPoint, geoKey) {
       let pointM = data.hits[0].point.lat + "," + data.hits[0].point.lng; // for displayMAP API - lat,Long
       startCoords = pointM;
 
-      runWayPointCoords(waypoints, geoKey);
+      if (waypointCounter > 0) {
+        runWayPointCoords(waypoints, geoKey);
+      } else {
+        runEndCoord(endPoint, geoKey);
+      }
     });
 }
-
+//Add IF Statement
 //function to gather the end coordinates and continue building the arrays for Route/Places/Display Map
 function runWayPointCoords(wayPoints, geokey) {
   let wayPointsW = [];
@@ -118,7 +130,14 @@ function runWayPointCoords(wayPoints, geokey) {
       new Promise(function (resolve, reject) {
         fetch(geocodeApiS)
           .then(function (response) {
-            return response.json();
+
+            if (response.status === 200) {
+              return response.json();
+            } else {
+              console.log('error');
+              openErrorMsg();
+              return;
+            }
           })
           .then(function (data) {
             let long = parseFloat(data.hits[0].point.lng); // for Routes API - Long,Lat
@@ -139,11 +158,11 @@ function runWayPointCoords(wayPoints, geokey) {
           });
       })
     );
-    }
-    Promise.all(promises)
-        .then(function(){
-            runEndCoord(endPoint, geoKey);
-        })
+  }
+  Promise.all(promises)
+    .then(function () {
+      runEndCoord(endPoint, geoKey);
+    })
 }
 
 //function to gather the end coordinates and continue building the arrays for Route/Places/Display Map
@@ -156,182 +175,258 @@ function runEndCoord(endPoint, geoKey) {
     "&limit=1";
   fetch(geocodeApiS)
     .then(function (response) {
-      return response.json();
+      if (response.status === 200) {
+        return response.json();
+      } else {
+        console.log('error');
+        openErrorMsg();
+        return;
+      }
     })
     .then(function (data) {
-      console.log(data);  
-  let long = parseFloat(data.hits[0].point.lng); // for Routes API - Long,Lat
-  let lat = parseFloat(data.hits[0].point.lat);
-  let pointR = [];
-  pointR.push(long);
-  pointR.push(lat);;
-  points.push(pointR);
+      if (!data) {
+        return;
+      }
+      console.log(data);
+      let long = parseFloat(data.hits[0].point.lng); // for Routes API - Long,Lat
+      let lat = parseFloat(data.hits[0].point.lat);
+      let pointR = [];
+      pointR.push(long);
+      pointR.push(lat);
+      points.push(pointR);
 
-  let pointP = data.hits[0].point.lng + "," + data.hits[0].point.lat; // for Places API - long,lat
-  points2.push(pointP);
+      let pointP = data.hits[0].point.lng + "," + data.hits[0].point.lat; // for Places API - long,lat
+      points2.push(pointP);
 
-  let pointM = data.hits[0].point.lat + "," + data.hits[0].point.lng; // for displayMAP API - lat,Long
-  destCoords = pointM; 
+      let pointM = data.hits[0].point.lat + "," + data.hits[0].point.lng; // for displayMAP API - lat,Long
+      destCoords = pointM;
 
-  runRouteAPI();
-  runPlacesApi();
-});
+      runRouteAPI();
+    });
 }
 
 //------ CODE NOTES FOR THE ROUTES FETCH FUNCTION ---- BEGIN
 function runRouteAPI() {
-    let query = new URLSearchParams({
-        key: 'ae5c8056-a632-44f7-86b9-adfb12b8775b'
-    }).toString();
+  let query = new URLSearchParams({
+    key: 'ae5c8056-a632-44f7-86b9-adfb12b8775b'
+  }).toString();
 
-    const resp =  fetch(
+  const resp = fetch(
     `https://graphhopper.com/api/1/route?${query}`,
     {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-              points: points,
-              optimize: 'true',
-              details: ['road_class', 'surface'],
-              vehicle: 'car',
-        })
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        points: points,
+        optimize: 'true',
+        details: ['road_class', 'surface'],
+        vehicle: 'car',
+      })
     }
-)
-.then(function(response) {
-    return response.json();
-})
-.then(function(data) {
-    console.log("route", data);
-    distance = data.paths[0].distance * 0.000621371;
-    let gallonsUsed = distance / userMpgEl;
-    gasCost = gallonsUsed * averageGasPrice;
-    let newURL = "https://www.google.com/maps/embed/v1/directions?key=AIzaSyD4Xi4w8rZxYlWSoH9Ncby2mpwf0rX9q0g&origin=" + startCoords + "&destination=" + destCoords + "&waypoints=" + waypointCoords;
-    mapEl.attr("src",newURL);
-    appendWaypointList();
-})
+  )
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (data) {
+      let message = data.message;
+      console.log(message);
+      if (message !== undefined) {
+        console.log('error');
+        openErrorMsg();
+      }
+      distance = Math.round(data.paths[0].distance * 0.000621371);
+      console.log(userMpgEl);
+      console.log(distance);
+      console.log(distance.type);
+      let gallonsUsed = distance / userMpgEl;
+      console.log(gallonsUsed);
+      gasCost = Math.round(gallonsUsed * averageGasPrice);
+      console.log(gasCost);
+      let newURL = '';
+      if (waypointCounter > 0) {
+        newURL = "https://www.google.com/maps/embed/v1/directions?key=AIzaSyD4Xi4w8rZxYlWSoH9Ncby2mpwf0rX9q0g&origin=" + startCoords + "&destination=" + destCoords + "&waypoints=" + waypointCoords; // IF statement here
+      } else {
+        newURL = "https://www.google.com/maps/embed/v1/directions?key=AIzaSyD4Xi4w8rZxYlWSoH9Ncby2mpwf0rX9q0g&origin=" + startCoords + "&destination=" + destCoords; // IF statement here
+      }
+      mapEl.attr("src", newURL);
+      // Tried to save newUrl in local storage variable to change iframe's src attribute when the page loads but does not work
+      // savedUserInputs.googleMapUrl = newURL;
+      // console.log(savedUserInputs.googleMapUrl)
+      appendWaypointList();
+      runPlacesApi();
+    })
 }
-
-function appendWaypointList(){
-  for(var i = 0; i < waypoints.length; i++){
-    let waypointName = $("<li>"+ waypoints[i] + "</li>");
-    returnedWaypoints.append(waypointName);
+// --- NEED IF STATEMENT HERE ---//
+function appendWaypointList() {
+  if (waypointCounter > 0) {
+    for (var i = 0; i < waypoints.length; i++) {
+      let waypointName = $("<li>" + waypoints[i] + "</li>");
+      returnedWaypoints.append(waypointName);
+    }
   }
-  let endPointName = $("<li>"+ endPoint + "</li>");
+  let endPointName = $("<li>" + endPoint + "</li>");
   returnedWaypoints.append(endPointName);
 
-  returnedGasCost.text(gasCost);
-  returnedTotalMiles.text(distance);
+  returnedGasCost.text(gasCost.toFixed(2));
+  returnedTotalMiles.text(distance.toFixed(2));
+
 }
 //------ CODE NOTES FOR THE ROUTES FETCH FUNCTION ---- END
 
 //------ CODE NOTES FOR THE PLACES FETCH FUNCTION ---- BEGIN
 // this function will hold the fetch for the places API but also the code for inserting the HTML elements with the places data
 function runPlacesApi() {
-let plaKey = "6ZmvylZaxk7KwhT7yxiK5EB3NQJ42tSb";
-console.log(points2)
-let cardEl = "section";
-let divEl = "div";
-let ulEl = "ul";
-let h2El = "h2"
-let liEl = "li";
-let h3El = "h3";
-let waypointEls = [];
-let waypointHeaderEls = [];
-let placeListHEls = [];
-let placeListBEls = [];
-let placeListREls = [];
+  let plaKey = "6ZmvylZaxk7KwhT7yxiK5EB3NQJ42tSb";
+  console.log(points2)
+  let cardEl = "section";
+  let divEl = "div";
+  let ulEl = "ul";
+  let h2El = "h2"
+  let liEl = "li";
+  let h3El = "h3";
+  let waypointEls = [];
+  let waypointHeaderEls = [];
+  let placeListHEls = [];
+  let placeListREls = [];
+  let placeListPEls = [];
 
-for (let i = 1; i < points2.length; i++) {
-  let waypointEl = document.createElement(cardEl);
-  let waypointHeaderEl = document.createElement(h2El);
-  let placeListHEl = document.createElement(divEl);
-  let placeListBEl = document.createElement(divEl);
-  let placeListREl = document.createElement(divEl);
- 
-//need to set Grid Attributes for materialize to the crated elements
-waypointEl.setAttribute("id", "waypointEl" + i)
-waypointEls[i] = waypointEl;
-waypointsPlacesEl.append(waypointEls[i]);
+  for (let i = 1; i < points2.length; i++) {
+    let waypointEl = document.createElement(cardEl);
+    let waypointHeaderEl = document.createElement(h2El);
+    let placeListHEl = document.createElement(divEl);
+    let placeListREl = document.createElement(divEl);
+    let placeListPEl = document.createElement(divEl);
+    let dividerEl = document.createElement(divEl);
+    dividerEl.setAttribute("class", "divider")
 
-//make the section a column container so the sections stack
-waypointHeaderEl.textContent = waypoints2[i];
-waypointHeaderEl.setAttribute("id", "waypoint-header" + i );
-waypointHeaderEls[i] = waypointHeaderEl;
+    //need to set Grid Attributes for materialize to the crated elements
+    waypointEl.setAttribute("id", "waypointEl" + i)
+    waypointEls[i] = waypointEl;
+    waypointEl.setAttribute("class", "row");
+    waypointsPlacesEl.append(waypointEls[i]);
 
-// make these dive elements row containers so they appear side by side 
-placeListHEl.setAttribute("id", "place-listH" + i );
-placeListHEls[i] =placeListHEl;
-placeListBEl.setAttribute("id", "place-listB" + i );
-placeListBEls[i] =placeListBEl;
-placeListREl.setAttribute("id", "place-listR" + i );
-placeListREls[i] =placeListREl;
+    //make the section a column container so the sections stack
+    waypointHeaderEl.textContent = waypoints2[i];
+    waypointHeaderEl.setAttribute("id", "waypoint-header" + i);
+    waypointHeaderEls[i] = waypointHeaderEl;
 
-let waypointSectionelementId = "#waypointEl" + i;
+    // make these dive elements row containers so they appear side by side 
+    placeListHEl.setAttribute("id", "place-listH" + i);
+    placeListHEl.setAttribute("class", "waypoint-poi col s12 m4 l4")
+    placeListHEls[i] = placeListHEl;
+    placeListREl.setAttribute("id", "place-listR" + i);
+    placeListREl.setAttribute("class", "waypoint-poi col s12 m4 l4")
+    placeListREls[i] = placeListREl;
+    placeListPEl.setAttribute("id", "place-listP" + i);
+    placeListPEl.setAttribute("class", "waypoint-poi col s12 m4 l4")
+    placeListPEls[i] = placeListPEl;
 
-$(waypointSectionelementId).append(waypointHeaderEls[i]);
-$(waypointSectionelementId).append(placeListHEls[i]);
-$(waypointSectionelementId).append(placeListBEls[i]);
-$(waypointSectionelementId).append(placeListREls[i]);
+    let waypointSectionelementId = "#waypointEl" + i;
 
-//need to replicate what is done for "hotels" in the other fetch APIs to populate the places cards
+    $(waypointSectionelementId).append(dividerEl)
+    $(waypointSectionelementId).append(waypointHeaderEls[i]);
+    $(waypointSectionelementId).append(placeListHEls[i]);
+    $(waypointSectionelementId).append(placeListREls[i]);
+    $(waypointSectionelementId).append(placeListPEls[i]);
 
-let placeApiH = "https://www.mapquestapi.com/search/v4/place?location="+points2[i]+",&q=hotels&sort=relevance&feedback=false&key="+plaKey;
+    //need to replicate what is done for "hotels" in the other fetch APIs to populate the places cards
 
-let listHElementID = "#place-listH" + i;
+    let placeApiH = "https://www.mapquestapi.com/search/v4/place?location=" + points2[i] + ",&q=hotels&sort=relevance&feedback=false&key=" + plaKey;
 
-let hotelHeader = document.createElement(h3El)
-hotelHeader.textContent = "Hotels in the Area";
-$(listHElementID).append(hotelHeader);
-let hotelUlEl = document.createElement(ulEl)
-hotelUlEl.setAttribute("id", "place-Ul" + i);
-$(listHElementID).append(hotelUlEl)
-let hotelUlElId = "#place-Ul" + i;
-fetch(placeApiH)
-    .then(function (response){
+    let listHElementID = "#place-listH" + i;
+
+    let hotelHeader = document.createElement(h3El)
+    hotelHeader.textContent = "Hotels in the Area";
+    $(listHElementID).append(hotelHeader);
+    let hotelUlEl = document.createElement(ulEl)
+    hotelUlEl.setAttribute("id", "hotel-place-Ul" + i);
+    $(listHElementID).append(hotelUlEl)
+    let hotelUlElId = "#hotel-place-Ul" + i;
+    fetch(placeApiH)
+      .then(function (response) {
         return response.json();
-    })
-    .then(function (data) {
+      })
+      .then(function (data) {
         console.log(data);
         let resultsH = data.results;
-        console.log("testResults", resultsH)
         for (let h = 0; h < resultsH.length; h++) {
           let placelistitemEl = document.createElement(liEl);
           let hotel = resultsH[h].name;
           let hotelAddress = resultsH[h].place.properties.street;
           let hotelCity = resultsH[h].place.properties.city;
           let hotelState = resultsH[h].place.properties.stateCode;
-          let hotelDisplay = hotel + ", " + hotelAddress + ", " + hotelCity+ ", " + hotelState;
+          let hotelDisplay = hotel + ", " + hotelAddress + ", " + hotelCity + ", " + hotelState;
           placelistitemEl.textContent = hotelDisplay;
           $(hotelUlElId).append(placelistitemEl);
         }
-    })
-let placeApiB = "https://www.mapquestapi.com/search/v4/place?location="+points2[i]+",&q=bars&sort=relevance&feedback=false&key="+plaKey;
+      })
+    let placeApiB = "https://www.mapquestapi.com/search/v4/place?location=" + points2[i] + ",&q=restaurants&sort=relevance&feedback=false&key=" + plaKey;
 
-let listBElementID = "#place-listB" + i;
+    let listRElementID = "#place-listR" + i;
 
-fetch(placeApiB)
-    .then(function (response){
+    let restaurantHeader = document.createElement(h3El)
+    restaurantHeader.textContent = "Restaurants in the Area";
+    $(listRElementID).append(restaurantHeader);
+    let restaurantUlEl = document.createElement(ulEl)
+    restaurantUlEl.setAttribute("id", "restaurant-place-Ul" + i);
+    $(listRElementID).append(restaurantUlEl)
+    let restaurantUlElId = "#restaurant-place-Ul" + i;
+
+    fetch(placeApiB)
+      .then(function (response) {
         return response.json();
-    })
-    .then(function (data) {
+      })
+      .then(function (data) {
         console.log(data);
-    })
-let placeApiR = "https://www.mapquestapi.com/search/v4/place?location="+points2[i]+",&q=restaurants&sort=relevance&feedback=false&key="+plaKey;
+        let resultsR = data.results;
+        for (let r = 0; r < resultsR.length; r++) {
+          let placelistitemEl = document.createElement(liEl);
+          let restaurant = resultsR[r].name;
+          let restaurantAddress = resultsR[r].place.properties.street;
+          let restaurantCity = resultsR[r].place.properties.city;
+          let restaurantState = resultsR[r].place.properties.stateCode;
+          let restaurantDisplay = restaurant + ", " + restaurantAddress + ", " + restaurantCity + ", " + restaurantState;
+          placelistitemEl.textContent = restaurantDisplay;
+          $(restaurantUlElId).append(placelistitemEl);
+        }
+      })
+    let placeApiR = "https://www.mapquestapi.com/search/v4/place?location=" + points2[i] + ",&q=parks&sort=relevance&feedback=false&key=" + plaKey;
 
-let listRElementID = "#place-listR" + i;
+    let listPElementID = "#place-listP" + i;
 
-fetch(placeApiR)
-    .then(function (response){
+    let parkHeader = document.createElement(h3El)
+    parkHeader.textContent = "Parks in the Area";
+    $(listPElementID).append(parkHeader);
+    let parkUlEl = document.createElement(ulEl)
+    parkUlEl.setAttribute("id", "park-place-Ul" + i);
+    $(listPElementID).append(parkUlEl)
+    let parkUlElId = "#park-place-Ul" + i;
+
+    fetch(placeApiR)
+      .then(function (response) {
         return response.json();
-    })
-    .then(function (data) {
+      })
+      .then(function (data) {
         console.log(data);
-    })
+        let resultsP = data.results;
+        for (let p = 0; p < resultsP.length; p++) {
+          let placelistitemEl = document.createElement(liEl);
+          let park = resultsP[p].name;
+          let parkAddress = resultsP[p].place.properties.street;
+          let parkCity = resultsP[p].place.properties.city;
+          let parkState = resultsP[p].place.properties.stateCode;
+          let parkDisplay = park + ", " + parkAddress + ", " + parkCity + ", " + parkState;
+          placelistitemEl.textContent = parkDisplay;
+          $(parkUlElId).append(placelistitemEl);
+        }
+      })
   }
-  }
+}
 //------ CODE NOTES FOR THE PLACES FETCH FUNCTION ---- END
+
+let savedUserInputs = {};
 
 // Gas Prices API
 let gasPricesApi =
@@ -345,13 +440,43 @@ fetch(gasPricesApi)
     console.log(data);
     let rdata = data.response;
     averageGasPrice = rdata.data[0].value;
+    init();
   });
+
+
+
+function clearData() {
+  userStartCityEl = "";
+  userStartStateEl = "";
+  userEndCityEl = "";
+  userEndStateEl = "";
+  userMpgEl = "";
+  startPoint = "";
+  endPoint = "";
+  points = [];
+  points2 = [];
+  startCoords = "";
+  destCoords = "";
+  waypointCoords = "";
+  waypoints = [];
+  waypoints2 = ["Blank"];
+  gasCost = "";
+  distance = "";
+  userMpgEl = "";
+  // Clears array that will go into user's local storage
+  savedUserInputs = {};
+  localStorage.setItem("savedUserInputs", JSON.stringify(savedUserInputs));
+}
 //executes data collection for what the user has input on the page
 let userStartCityEl = "";
-let userStartStateEl="";
-let userEndCityEl="";
-let userEndStateEl="";
-let userMpgEl="";
+let userStartStateEl = "";
+let userEndCityEl = "";
+let userEndStateEl = "";
+let userMpgEl = "";
+
+
+
+
 
 let returnedWaypoints = $("#waypoint-list")
 let returnedGasCost = $("#gas-cost")
@@ -363,26 +488,65 @@ let endPoint = userEndCityEl + "," + userEndStateEl; // equals the input of the 
 let geoKey = "ae5c8056-a632-44f7-86b9-adfb12b8775b";
 
 submitButtonEl.on("click", async function () {
+  clearData();
+
+  savedUserInputs = {
+    startCity:'',
+    startState:'',
+    endCity:'',
+    endState:'',
+    mpg:'',
+  }
+
+  returnedWaypoints.empty();
   userStartCityEl = $("#start-city-input").val();
   userStartStateEl = $("#start-state-input").val();
   userEndCityEl = $("#end-city-input").val();
   userEndStateEl = $("#end-state-input").val();
   userMpgEl = $("#mpg-input").val();
+  mapEl.attr("https://www.google.com/maps/embed/v1/view?key=AIzaSyD4Xi4w8rZxYlWSoH9Ncby2mpwf0rX9q0g&center=41.925391, -102.455213");
+
+  userStartCityEl = userStartCityEl.toLowerCase().replace(/(^|\s)\S/g, function (letter) {
+    return letter.toUpperCase();
+  })
+  userEndCityEl = userEndCityEl.toLowerCase().replace(/(^|\s)\S/g, function (letter) {
+    return letter.toUpperCase();
+  })
+
+  userStartStateEl = userStartStateEl.toUpperCase();
+  userEndStateEl = userEndStateEl.toUpperCase();
+  // if (myArray.length === 0)
 
   if (waypointCounter > 0) {
     for (let i = 0; i < waypointCounter; i++) {
       let waypointCity = $("#cityWay" + i).val();
       let waypointState = $("#stateWay" + i).val();
+      
+      waypointCity = waypointCity.toLowerCase().replace(/(^|\s)\S/g, function (letter) {
+        return letter.toUpperCase();
+      })
+
+      waypointState = waypointState.toUpperCase();
+      
+
       let cityState = waypointCity + "," + waypointState;
       waypoints.push(cityState);
       waypoints2.push(cityState);
     }
   }
 
+  savedUserInputs.startCity = userStartCityEl;
+  savedUserInputs.startState = userStartStateEl;
+  savedUserInputs.endCity = userEndCityEl;
+  savedUserInputs.endState = userEndStateEl;
+  savedUserInputs.mpg = userMpgEl;
+
+  localStorage.setItem('savedUserInputs', JSON.stringify(savedUserInputs));
+
   startPoint = userStartCityEl + "," + userStartStateEl; // equals the input of the "Starting point" html element
   endPoint = userEndCityEl + "," + userEndStateEl; // equals the input of the "End point" html element
-waypoints2.push(endPoint);
-console.log (waypoints2)
+  waypoints2.push(endPoint);
+  console.log(waypoints2)
   // we will need a conditional IF statement to determine if waypoints are used - these need to be ran in a certain order to make the Route/Place/Display Map API's Work
 
   runStartCoord(startPoint, geoKey);
@@ -392,7 +556,60 @@ console.log (waypoints2)
 // When user data is saved locally and in arrays in Javascript,this function will also clear those as well
 // Add modal for user to confirm they actually want to clear their data
 clearButtonEl.on("click", function () {
+  $("#start-city-input").val('');
+  $("#start-state-input").val('');
+  $("#end-city-input").val('');
+  $("#end-state-input").val('');
+  $("#mpg-input").val('');
   waypointDivEl.empty();
-  wayPoints = [];
   waypointCounter = 0;
+
+  mapEl.attr("src", "https://www.google.com/maps/embed/v1/view?key=AIzaSyD4Xi4w8rZxYlWSoH9Ncby2mpwf0rX9q0g&center=41.925391, -102.455213");
+
+  clearData();
 })
+
+function init(){
+  savedUserInputs = JSON.parse(localStorage.getItem('savedUserInputs'));
+
+  if(savedUserInputs.startCity !== undefined){
+    $("#start-city-input").val(savedUserInputs.startCity);
+    $("#start-state-input").val(savedUserInputs.startState);
+    $("#end-city-input").val(savedUserInputs.endCity);
+    $("#end-state-input").val(savedUserInputs.endState);
+    $("#mpg-input").val(savedUserInputs.mpg);
+
+    userMpgEl = Number(savedUserInputs.mpg);
+    startPoint = savedUserInputs.startCity + "," + savedUserInputs.startState ; // equals the input of the "Starting point" html element
+    endPoint = savedUserInputs.endCity + "," + savedUserInputs.endState; // equals the input of the "End point" html element
+
+    runStartCoord(startPoint, geoKey);
+    }
+
+}
+
+// function showModal() {
+//   // Call this function when you want to show the modal
+//   openModal();
+// }
+
+function openErrorMsg() {
+  const modalElem = document.querySelector('#modal1');
+
+  const closeModalBtn = document.querySelector('.modal-close');
+
+  const modalInstance = M.Modal.init(modalElem);
+
+  // function openModal() {
+  modalInstance.open();
+  // }
+
+  // openModal();
+
+  // Attach the closeModal function to the close button click event
+  closeModalBtn.addEventListener('click', closeModal);
+
+  function closeModal() {
+    modalInstance.close();
+  }
+};
