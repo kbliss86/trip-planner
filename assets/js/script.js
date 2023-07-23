@@ -230,17 +230,20 @@ function runRouteAPI() {
       return response.json();
     })
     .then(function (data) {
-      console.log("route", data);
       let message = data.message;
       console.log(message);
       if (message !== undefined) {
         console.log('error');
         openErrorMsg();
       }
-      distance = data.paths[0].distance * 0.000621371;
+      distance = Math.round(data.paths[0].distance * 0.000621371);
       console.log(userMpgEl);
+      console.log(distance);
+      console.log(distance.type);
       let gallonsUsed = distance / userMpgEl;
-      gasCost = gallonsUsed * averageGasPrice;
+      console.log(gallonsUsed);
+      gasCost = Math.round(gallonsUsed * averageGasPrice);
+      console.log(gasCost);
       let newURL = '';
       if (waypointCounter > 0) {
         newURL = "https://www.google.com/maps/embed/v1/directions?key=AIzaSyD4Xi4w8rZxYlWSoH9Ncby2mpwf0rX9q0g&origin=" + startCoords + "&destination=" + destCoords + "&waypoints=" + waypointCoords; // IF statement here
@@ -348,7 +351,6 @@ function runPlacesApi() {
       .then(function (data) {
         console.log(data);
         let resultsH = data.results;
-        console.log("testResults", resultsH)
         for (let h = 0; h < resultsH.length; h++) {
           let placelistitemEl = document.createElement(liEl);
           let hotel = resultsH[h].name;
@@ -379,7 +381,6 @@ function runPlacesApi() {
       .then(function (data) {
         console.log(data);
         let resultsR = data.results;
-        console.log("testResults", resultsR)
         for (let r = 0; r < resultsR.length; r++) {
           let placelistitemEl = document.createElement(liEl);
           let restaurant = resultsR[r].name;
@@ -410,7 +411,6 @@ function runPlacesApi() {
       .then(function (data) {
         console.log(data);
         let resultsP = data.results;
-        console.log("testResults", resultsP)
         for (let p = 0; p < resultsP.length; p++) {
           let placelistitemEl = document.createElement(liEl);
           let park = resultsP[p].name;
@@ -506,13 +506,29 @@ submitButtonEl.on("click", async function () {
   userMpgEl = $("#mpg-input").val();
   mapEl.attr("https://www.google.com/maps/embed/v1/view?key=AIzaSyD4Xi4w8rZxYlWSoH9Ncby2mpwf0rX9q0g&center=41.925391, -102.455213");
 
+  userStartCityEl = userStartCityEl.toLowerCase().replace(/(^|\s)\S/g, function (letter) {
+    return letter.toUpperCase();
+  })
+  userEndCityEl = userEndCityEl.toLowerCase().replace(/(^|\s)\S/g, function (letter) {
+    return letter.toUpperCase();
+  })
 
+  userStartStateEl = userStartStateEl.toUpperCase();
+  userEndStateEl = userEndStateEl.toUpperCase();
   // if (myArray.length === 0)
 
   if (waypointCounter > 0) {
     for (let i = 0; i < waypointCounter; i++) {
       let waypointCity = $("#cityWay" + i).val();
       let waypointState = $("#stateWay" + i).val();
+      
+      waypointCity = waypointCity.toLowerCase().replace(/(^|\s)\S/g, function (letter) {
+        return letter.toUpperCase();
+      })
+
+      waypointState = waypointState.toUpperCase();
+      
+
       let cityState = waypointCity + "," + waypointState;
       waypoints.push(cityState);
       waypoints2.push(cityState);
@@ -563,7 +579,7 @@ function init(){
     $("#end-state-input").val(savedUserInputs.endState);
     $("#mpg-input").val(savedUserInputs.mpg);
 
-    userMpgEl = savedUserInputs.mpg;
+    userMpgEl = Number(savedUserInputs.mpg);
     startPoint = savedUserInputs.startCity + "," + savedUserInputs.startState ; // equals the input of the "Starting point" html element
     endPoint = savedUserInputs.endCity + "," + savedUserInputs.endState; // equals the input of the "End point" html element
 
