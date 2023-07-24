@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- I just made a basic HTML landing page and linked to the stylesheet -->
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dev Dynasty Map App</title>
-  <!-- <link rel="stylesheet" href="	https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"> -->
+  <!-- jquery API  -->
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
   <!-- Materialize CSS Api -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <!-- Local Stylesheet  -->
   <link rel="stylesheet" href="./assets/css/style.css">
 </head>
 
@@ -23,57 +23,52 @@
   <main class="col">
     <div class="section"></div>
     <section class="row border">
+      <!-- Search Box Card  -->
+      <!-- Start Point  -->
       <section id="search-card" class="col s12 m6 l4 z-depth-1"><!-- text-center border p-3 m-5 -->
         <label class="form-label" id="User-StartPoint">Start Point</label>
         <br><br>
         <input id="start-city-input" class="city-input input-field col" type="text" placeholder="Enter City">
         <input type="text" id="start-state-input" class="state-input input-field col" type="text"
           placeholder="Enter State">
-        
+        <!-- End Point  -->
         <label class="form-label" id="User-EndPoint">End Point</label>
         <br><br>
         <input id="end-city-input" class="city-input input-field col" type="text" placeholder="Enter City">
         <input id="end-state-input" class="state-input input-field col" type="text" placeholder="Enter State">
-
+        <!-- Vehicle MPG  -->
         <label class="form-label" id="User-StartPoint">Vehicle MPG</label>
         <br><br>
         <input id="mpg-input" class="mpg-input input-field col" type="text" placeholder="Enter Miles Per Gallon">
-        
+        <!-- Waypoints  -->
+        <button class="btn-large blue lighten rounded waves-effect waves-light" id="add-waypoint">Add Waypoint</button>
+        <div id="waypoint-div"></div>
 
-      <!-- Testing Buttons -->
-      <!-- <button id="add-waypoint">Add Waypoint</button> -->
-      <button class="btn-large blue lighten rounded waves-effect waves-light" id="add-waypoint">Add Waypoint</button>
-      <div id="waypoint-div"></div>
-      
-      <!-- <button type="button">Clear</button> -->
-      <button id="clear-button" class="btn-large red rounded waves-effect waves-light">Clear</button>
-      <!-- <button id="submit-button" type="button">Submit</button> -->
-      <button id="submit-button" class="btn-large green lighten rounded waves-effect waves-light" id="submit-button">Submit</button>
-      <!-- <button type="button">Clear</button> -->
+        <button id="clear-button" class="btn-large red rounded waves-effect waves-light">Clear</button>
+
+        <button id="submit-button" class="btn-large green lighten rounded waves-effect waves-light"
+          id="submit-button">Submit</button>
+
       </section>
       <section class="col s12 m6 l8">
-        <!-- <section class="col"> -->
-          <section id="map-section" class="row z-depth-1"><!-- border p-3 m-5 -->
-          <!-- <img src="https://placehold.co/600x600" alt="Map"> -->
-            <iframe id="mapEl"
-              src="https://www.google.com/maps/embed/v1/view?key=AIzaSyD4Xi4w8rZxYlWSoH9Ncby2mpwf0rX9q0g&center=41.925391, -102.455213" height="800px">
-            </iframe>
+        <!-- Embedded Map Card  -->
+        <section id="map-section" class="row z-depth-1">
+          <iframe id="mapEl"
+            src="https://www.google.com/maps/embed/v1/view?key=AIzaSyD4Xi4w8rZxYlWSoH9Ncby2mpwf0rX9q0g&center=41.925391, -102.455213"
+            height="800px">
+          </iframe>
         </section>
-          <div class="divider"></div>
-          <section class="row returned-data"><!-- border p-3 m-5 -->
-            <div class="col s12 m4 l4">Each Waypoint:
-              <ul id="waypoint-list"></ul>
-            </div>
-            <div class="col s12 m4 l4">Cost of Gas: <span id="gas-cost"></span></div>
-            <div class="col s12 m4 l4">Total Miles: <span id="total-miles"></span></div>
+        <div class="divider"></div>
+        <section class="row returned-data">
+          <div class="col s12 m4 l4">Each Waypoint:
+            <ul id="waypoint-list"></ul>
+          </div>
+          <div class="col s12 m4 l4">Cost of Gas: <span id="gas-cost"></span></div>
+          <div class="col s12 m4 l4">Total Miles: <span id="total-miles"></span></div>
         </section>
-      <!-- </section> -->
+      </section>
     </section>
-
-    </section>
-    <!-- make this a column container -->
-
-  <!-- Modal Structure -->
+    <!-- Modal Popup for Error API Messages -->
     <div id="invalid-location" class="modal" hidden>
       <div class="modal-content">
         <h4>Invalid City or State Name</h4>
@@ -83,33 +78,32 @@
         <a href="#!" class="modal-close waves-effect waves-green btn-flat">Ok</a>
       </div>
     </div>
-      <section id="modal2" class="col p-3 m-5">
-      </section>
-
-      <div id="invalid-mpg" class="modal" hidden>
-        <div class="modal-content">
-          <h4>Invalid Vehicle Miles per Gallon</h4>
-          <p>Please enter the MPG of your car.</p>
-        </div>
-        <div class="modal-footer">
-          <a href="#!" class="modal-close waves-effect waves-green btn-flat">Ok</a>
-        </div>
+    <section id="modal2" class="col p-3 m-5">
+    </section>
+    <!-- Modal Popup for missing value or invalid character  -->
+    <div id="invalid-mpg" class="modal" hidden>
+      <div class="modal-content">
+        <h4>Invalid Vehicle Miles per Gallon</h4>
+        <p>Please enter the MPG of your car.</p>
       </div>
-        <section id="waypoint-places" class="col p-3 m-5">
-        </section>
-
+      <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Ok</a>
+      </div>
+    </div>
+    <section id="waypoint-places" class="col p-3 m-5">
+    </section>
   </main>
 
-
-  
   <footer class="page-footer deep-purple">
     <div class="container center-align">&copy; 2023 Dev Dynasty</div>
   </footer>
 </body>
+<!-- Materialize JS  -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-<!-- jquery needs to be below meterialize  -->
+<!-- jquery JS "auto complete" -->
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<!-- Local JS -->
 <script src="./assets/js/script.js"> </script>
 
 </html>
