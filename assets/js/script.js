@@ -300,8 +300,8 @@ function appendWaypointList() {
   let endPointName = $("<li>" + endPoint + "</li>");
   returnedWaypoints.append(endPointName);
 
-  returnedGasCost.text(gasCost.toFixed(2));
-  returnedTotalMiles.text(distance.toFixed(2));
+  returnedGasCost.text(gasCost);
+  returnedTotalMiles.text(distance);
 
 }
 
