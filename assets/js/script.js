@@ -308,7 +308,7 @@ function appendWaypointList() {
 //------ CODE NOTES FOR THE PLACES FETCH FUNCTION ---- BEGIN
 // this function will hold the fetch for the places API but also the code for inserting the HTML elements with the places data
 function runPlacesApi() {
-  let plaKey = "6ZmvylZaxk7KwhT7yxiK5EB3NQJ42tSb";
+  let plaKey = process.env.mapquestKey;
   let cardEl = "section";
   let divEl = "div";
   let ulEl = "ul";
