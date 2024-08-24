@@ -305,159 +305,165 @@ function appendWaypointList() {
 
 }
 
-//------ CODE NOTES FOR THE PLACES FETCH FUNCTION ---- BEGIN
-// this function will hold the fetch for the places API but also the code for inserting the HTML elements with the places data
-function runPlacesApi() {
-  let plaKey = process.env.mapquestKey;
-  let cardEl = "section";
-  let divEl = "div";
-  let ulEl = "ul";
-  let h2El = "h2"
-  let liEl = "li";
-  let h3El = "h3";
-  let waypointEls = [];
-  let waypointHeaderEls = [];
-  let placeListHEls = [];
-  let placeListREls = [];
-  let placeListPEls = [];
-
-  // Loops through the points array containing waypoints
-  // Appends a list of hotels, restaurants, and bars for each waypoint including the end point
-  for (let i = 1; i < points2.length; i++) {
-    // Creates all elements for each waypoint section
-    let waypointEl = document.createElement(cardEl);
-    let waypointHeaderEl = document.createElement(h2El);
-    let placeListHEl = document.createElement(divEl);
-    let placeListREl = document.createElement(divEl);
-    let placeListPEl = document.createElement(divEl);
-    let dividerEl = document.createElement(divEl);
-    // Div element that acts as a top margin for each separate waypoint section
-    dividerEl.setAttribute("class", "divider")
-
-    waypointEl.setAttribute("id", "waypointEl" + i)
-    waypointEls[i] = waypointEl;
-    waypointEl.setAttribute("class", "row");
-    waypointsPlacesEl.append(waypointEls[i]);
-
-    waypointHeaderEl.textContent = waypoints2[i];
-    waypointHeaderEl.setAttribute("id", "waypoint-header" + i);
-    waypointHeaderEls[i] = waypointHeaderEl;
-
-    // Attributes set to each div that materialize uses for formatting
-    // About to have the hotels, restaurants, and parks section sitting side-by-side in a row
-    placeListHEl.setAttribute("id", "place-listH" + i);
-    placeListHEl.setAttribute("class", "waypoint-poi col s12 m4 l4")
-    placeListHEls[i] = placeListHEl;
-    placeListREl.setAttribute("id", "place-listR" + i);
-    placeListREl.setAttribute("class", "waypoint-poi col s12 m4 l4")
-    placeListREls[i] = placeListREl;
-    placeListPEl.setAttribute("id", "place-listP" + i);
-    placeListPEl.setAttribute("class", "waypoint-poi col s12 m4 l4")
-    placeListPEls[i] = placeListPEl;
-
-    let waypointSectionelementId = "#waypointEl" + i;
-
-    // Appends the different div elements
-    $(waypointSectionelementId).append(dividerEl)
-    $(waypointSectionelementId).append(waypointHeaderEls[i]);
-    $(waypointSectionelementId).append(placeListHEls[i]);
-    $(waypointSectionelementId).append(placeListREls[i]);
-    $(waypointSectionelementId).append(placeListPEls[i]);
-
-    // Gets the different hotels in the area of the waypoint that the for loop 
-    let placeApiH = "https://www.mapquestapi.com/search/v4/place?location=" + points2[i] + ",&q=hotels&sort=relevance&feedback=false&key=" + plaKey;
-
-    let listHElementID = "#place-listH" + i;
-
-    let hotelHeader = document.createElement(h3El)
-    hotelHeader.textContent = "Hotels in the Area";
-    $(listHElementID).append(hotelHeader);
-    let hotelUlEl = document.createElement(ulEl)
-    hotelUlEl.setAttribute("id", "hotel-place-Ul" + i);
-    $(listHElementID).append(hotelUlEl)
-    let hotelUlElId = "#hotel-place-Ul" + i;
-    // Fetch request for the list of hotels near the waypoint
-    fetch(placeApiH)
-      .then(function (response) {
-        return response.json();
-      })
-      .then(function (data) {
-        console.log(data);
-        let resultsH = data.results;
-        // Loops through each result for hotels and gets the address and appends it to the list
-        for (let h = 0; h < resultsH.length; h++) {
-          let placelistitemEl = document.createElement(liEl);
-          let hotel = resultsH[h].name;
-          let hotelAddress = resultsH[h].place.properties.street;
-          let hotelCity = resultsH[h].place.properties.city;
-          let hotelState = resultsH[h].place.properties.stateCode;
-          let hotelDisplay = hotel + ", " + hotelAddress + ", " + hotelCity + ", " + hotelState;
-          placelistitemEl.textContent = hotelDisplay;
-          $(hotelUlElId).append(placelistitemEl);
-        }
-      })
-    let placeApiB = "https://www.mapquestapi.com/search/v4/place?location=" + points2[i] + ",&q=restaurants&sort=relevance&feedback=false&key=" + plaKey;
-
-    let listRElementID = "#place-listR" + i;
-
-    let restaurantHeader = document.createElement(h3El)
-    restaurantHeader.textContent = "Restaurants in the Area";
-    $(listRElementID).append(restaurantHeader);
-    let restaurantUlEl = document.createElement(ulEl)
-    restaurantUlEl.setAttribute("id", "restaurant-place-Ul" + i);
-    $(listRElementID).append(restaurantUlEl)
-    let restaurantUlElId = "#restaurant-place-Ul" + i;
-    // Fetch request for the list of restaurants near the waypoint
-    fetch(placeApiB)
-      .then(function (response) {
-        return response.json();
-      })
-      .then(function (data) {
-        let resultsR = data.results;
-        // Loops through each result for restaurants, gets the address, and appends it to the list
-        for (let r = 0; r < resultsR.length; r++) {
-          let placelistitemEl = document.createElement(liEl);
-          let restaurant = resultsR[r].name;
-          let restaurantAddress = resultsR[r].place.properties.street;
-          let restaurantCity = resultsR[r].place.properties.city;
-          let restaurantState = resultsR[r].place.properties.stateCode;
-          let restaurantDisplay = restaurant + ", " + restaurantAddress + ", " + restaurantCity + ", " + restaurantState;
-          placelistitemEl.textContent = restaurantDisplay;
-          $(restaurantUlElId).append(placelistitemEl);
-        }
-      })
-    let placeApiR = "https://www.mapquestapi.com/search/v4/place?location=" + points2[i] + ",&q=parks&sort=relevance&feedback=false&key=" + plaKey;
-
-    let listPElementID = "#place-listP" + i;
-
-    let parkHeader = document.createElement(h3El)
-    parkHeader.textContent = "Parks in the Area";
-    $(listPElementID).append(parkHeader);
-    let parkUlEl = document.createElement(ulEl)
-    parkUlEl.setAttribute("id", "park-place-Ul" + i);
-    $(listPElementID).append(parkUlEl)
-    let parkUlElId = "#park-place-Ul" + i;
-    // Fetch request for the list of parks near the waypoint
-    fetch(placeApiR)
-      .then(function (response) {
-        return response.json();
-      })
-      .then(function (data) {
-        let resultsP = data.results;
-        // Loops through each result for parks and gets the address and appends it to the list
-        for (let p = 0; p < resultsP.length; p++) {
-          let placelistitemEl = document.createElement(liEl);
-          let park = resultsP[p].name;
-          let parkAddress = resultsP[p].place.properties.street;
-          let parkCity = resultsP[p].place.properties.city;
-          let parkState = resultsP[p].place.properties.stateCode;
-          let parkDisplay = park + ", " + parkAddress + ", " + parkCity + ", " + parkState;
-          placelistitemEl.textContent = parkDisplay;
-          $(parkUlElId).append(placelistitemEl);
-        }
-      })
-  }
+// Function to fetch the API key from the server
+function fetchApiKey() {
+  return fetch('/api/getApiKey')
+    .then(response => response.json())
+    .then(data => data.apiKey)
+    .catch(error => {
+      console.error("Error fetching API key:", error);
+      throw error;
+    });
 }
+
+//------ CODE NOTES FOR THE PLACES FETCH FUNCTION ---- BEGIN
+// This function fetches places data from the API and appends the data to the HTML
+function runPlacesApi() {
+  fetchApiKey().then(plaKey => {
+    console.log("Places API Key:", plaKey); // Check the key
+
+    let cardEl = "section";
+    let divEl = "div";
+    let ulEl = "ul";
+    let h2El = "h2";
+    let liEl = "li";
+    let h3El = "h3";
+    let waypointEls = [];
+    let waypointHeaderEls = [];
+    let placeListHEls = [];
+    let placeListREls = [];
+    let placeListPEls = [];
+
+    // Loops through the points array containing waypoints
+    // Appends a list of hotels, restaurants, and bars for each waypoint including the end point
+    for (let i = 1; i < points2.length; i++) {
+      // Creates all elements for each waypoint section
+      let waypointEl = document.createElement(cardEl);
+      let waypointHeaderEl = document.createElement(h2El);
+      let placeListHEl = document.createElement(divEl);
+      let placeListREl = document.createElement(divEl);
+      let placeListPEl = document.createElement(divEl);
+      let dividerEl = document.createElement(divEl);
+      
+      // Div element that acts as a top margin for each separate waypoint section
+      dividerEl.setAttribute("class", "divider");
+
+      waypointEl.setAttribute("id", "waypointEl" + i);
+      waypointEls[i] = waypointEl;
+      waypointEl.setAttribute("class", "row");
+      waypointsPlacesEl.append(waypointEls[i]);
+
+      waypointHeaderEl.textContent = waypoints2[i];
+      waypointHeaderEl.setAttribute("id", "waypoint-header" + i);
+      waypointHeaderEls[i] = waypointHeaderEl;
+
+      // Set attributes for formatting
+      placeListHEl.setAttribute("id", "place-listH" + i);
+      placeListHEl.setAttribute("class", "waypoint-poi col s12 m4 l4");
+      placeListHEls[i] = placeListHEl;
+
+      placeListREl.setAttribute("id", "place-listR" + i);
+      placeListREl.setAttribute("class", "waypoint-poi col s12 m4 l4");
+      placeListREls[i] = placeListREl;
+
+      placeListPEl.setAttribute("id", "place-listP" + i);
+      placeListPEl.setAttribute("class", "waypoint-poi col s12 m4 l4");
+      placeListPEls[i] = placeListPEl;
+
+      let waypointSectionelementId = "#waypointEl" + i;
+
+      // Append the div elements to the document
+      $(waypointSectionelementId).append(dividerEl);
+      $(waypointSectionelementId).append(waypointHeaderEls[i]);
+      $(waypointSectionelementId).append(placeListHEls[i]);
+      $(waypointSectionelementId).append(placeListREls[i]);
+      $(waypointSectionelementId).append(placeListPEls[i]);
+
+      // Fetch and append Hotels
+      let placeApiH = `https://www.mapquestapi.com/search/v4/place?location=${points2[i]}&q=hotels&sort=relevance&feedback=false&key=${plaKey}`;
+      let listHElementID = "#place-listH" + i;
+
+      let hotelHeader = document.createElement(h3El);
+      hotelHeader.textContent = "Hotels in the Area";
+      $(listHElementID).append(hotelHeader);
+
+      let hotelUlEl = document.createElement(ulEl);
+      hotelUlEl.setAttribute("id", "hotel-place-Ul" + i);
+      $(listHElementID).append(hotelUlEl);
+
+      let hotelUlElId = "#hotel-place-Ul" + i;
+
+      fetch(placeApiH)
+        .then(response => response.json())
+        .then(data => {
+          console.log(data);
+          let resultsH = data.results;
+          resultsH.forEach(hotel => {
+            let placelistitemEl = document.createElement(liEl);
+            let hotelDisplay = `${hotel.name}, ${hotel.place.properties.street}, ${hotel.place.properties.city}, ${hotel.place.properties.stateCode}`;
+            placelistitemEl.textContent = hotelDisplay;
+            $(hotelUlElId).append(placelistitemEl);
+          });
+        })
+        .catch(error => console.error("Error fetching hotels:", error));
+
+      // Fetch and append Restaurants
+      let placeApiB = `https://www.mapquestapi.com/search/v4/place?location=${points2[i]}&q=restaurants&sort=relevance&feedback=false&key=${plaKey}`;
+      let listRElementID = "#place-listR" + i;
+
+      let restaurantHeader = document.createElement(h3El);
+      restaurantHeader.textContent = "Restaurants in the Area";
+      $(listRElementID).append(restaurantHeader);
+
+      let restaurantUlEl = document.createElement(ulEl);
+      restaurantUlEl.setAttribute("id", "restaurant-place-Ul" + i);
+      $(listRElementID).append(restaurantUlEl);
+
+      let restaurantUlElId = "#restaurant-place-Ul" + i;
+
+      fetch(placeApiB)
+        .then(response => response.json())
+        .then(data => {
+          let resultsR = data.results;
+          resultsR.forEach(restaurant => {
+            let placelistitemEl = document.createElement(liEl);
+            let restaurantDisplay = `${restaurant.name}, ${restaurant.place.properties.street}, ${restaurant.place.properties.city}, ${restaurant.place.properties.stateCode}`;
+            placelistitemEl.textContent = restaurantDisplay;
+            $(restaurantUlElId).append(placelistitemEl);
+          });
+        })
+        .catch(error => console.error("Error fetching restaurants:", error));
+
+      // Fetch and append Parks
+      let placeApiR = `https://www.mapquestapi.com/search/v4/place?location=${points2[i]}&q=parks&sort=relevance&feedback=false&key=${plaKey}`;
+      let listPElementID = "#place-listP" + i;
+
+      let parkHeader = document.createElement(h3El);
+      parkHeader.textContent = "Parks in the Area";
+      $(listPElementID).append(parkHeader);
+
+      let parkUlEl = document.createElement(ulEl);
+      parkUlEl.setAttribute("id", "park-place-Ul" + i);
+      $(listPElementID).append(parkUlEl);
+
+      let parkUlElId = "#park-place-Ul" + i;
+
+      fetch(placeApiR)
+        .then(response => response.json())
+        .then(data => {
+          let resultsP = data.results;
+          resultsP.forEach(park => {
+            let placelistitemEl = document.createElement(liEl);
+            let parkDisplay = `${park.name}, ${park.place.properties.street}, ${park.place.properties.city}, ${park.place.properties.stateCode}`;
+            placelistitemEl.textContent = parkDisplay;
+            $(parkUlElId).append(placelistitemEl);
+          });
+        })
+        .catch(error => console.error("Error fetching parks:", error));
+    }
+  }).catch(error => console.error("Error fetching Places API key:", error));
+}
+
 //------ CODE NOTES FOR THE PLACES FETCH FUNCTION ---- END
 
 // Declares the variable that stores the local data
